@@ -9,8 +9,13 @@ import Control.Monad
 import Control.Monad.Trans
 
 ------------------------------
-type CPPParser = ParsecT String () IO
 type LineNumber = Int
+data ParserState = ParserState { originalLine :: LineNumber
+                               , directiveStack :: [CPPDirective]
+                               }
+  deriving (Show)
+------------------------------
+type CPPParser = ParsecT String ParserState IO
 data CPPDirective = CPPDirective LineNumber FilePath [DirectiveFlag]
   deriving (Show)
 
@@ -41,17 +46,18 @@ prettySection s = unlines $ prettySection' "" s
     prettySection' indent s =
       case s of
         (Block ls _ _)          -> prettyBlockLines indent ls
-        (Expansion ss p _ _ fs) -> prettyExpansion indent ss p fs
+        (Expansion ss p sl el fs) -> prettyExpansion indent ss p sl el fs
     prettyBlockLines indent ls =
       map (indent ++) ls
-    prettyExpansion indent ss p fs =
-      (indent ++ "SECTION " ++ p) : (concatMap (prettySection' ("  " ++ indent)) ss)
+    prettyExpansion indent ss p sl el fs =
+      let hdr = (indent ++ "SECTION [" ++ (show sl) ++ "," ++ (show el) ++ "] " ++ p)
+      in hdr : (concatMap (prettySection' ("  " ++ indent)) ss)
 ------------------------------
 
 parsePreprocessedFile :: FilePath -> IO (Either ParseError Section)
 parsePreprocessedFile path = do
   contents <- readFile path
-  runParserT parseManyExpansions () path contents
+  runParserT (parseManyExpansions path) (ParserState 1 []) path contents
 
 parsePlainLine :: CPPParser String
 parsePlainLine = do
@@ -119,14 +125,16 @@ parseBoringDirective = do
   lift $ putStrLn "Parse Boring Directive"
   return $ CPPDirective (read lineNumStr) fileNameStr flags'
 
-parseManyExpansions :: CPPParser Section
-parseManyExpansions = do
+parseManyExpansions :: FilePath -> CPPParser Section
+parseManyExpansions path = do
+  pos1 <- getPosition
   exps <- many parseExpansion
+  st   <- getState
   return $ Expansion {
     sections = exps,
-    filePath = "something",
-    startLineNum = 0,
-    endLineNum = 0,
+    filePath = path,
+    startLineNum = sourceLine pos1,
+    endLineNum = originalLine st,
     flags = []
   }
 
@@ -138,6 +146,7 @@ parseExpansion = (try parseBoringExpansion)
 parseBoringExpansion :: CPPParser Section
 parseBoringExpansion = do
   (CPPDirective lineNum path flags') <- parseBoringDirective
+  modifyState (\ps -> ps {originalLine = lineNum})
   return $ Expansion {
     sections     = [],
     filePath     = path,
@@ -148,8 +157,13 @@ parseBoringExpansion = do
 
 parseEnterExpansion :: CPPParser Section
 parseEnterExpansion = do
-  CPPDirective lineNum path flags' <- parseDirectiveWithEnterFile
+  d@(CPPDirective lineNum path flags') <- parseDirectiveWithEnterFile
+  lift $ putStrLn $ "Adding directive (" ++ (show d) ++ ") to stack"
+  modifyState (\ps -> ps {originalLine = lineNum, directiveStack = d : (directiveStack ps)})
   secs <- parseEnterSections
+
+  st <- getState
+  lift $ print st
 
   lift $ putStrLn "Parse Enter Expansion"
   return $ Expansion {
@@ -162,7 +176,9 @@ parseEnterExpansion = do
 
 parseReturnExpansion :: CPPParser Section
 parseReturnExpansion = do
-  CPPDirective lineNum path flags' <- parseDirectiveWithReturnFile
+  d@(CPPDirective lineNum path flags') <- parseDirectiveWithReturnFile
+  lift $ putStrLn $ "Adding directive (" ++ (show d) ++ ") to stack"
+  modifyState (\ps -> ps {originalLine = lineNum, directiveStack = d : (directiveStack ps)})
   secs <- parseReturnSections
 
   lift $ putStrLn "Parse Return Expansion"
