@@ -85,7 +85,7 @@ aSection = (try aSectionMiscDirective)
 aSectionMiscDirective :: CppParser Section
 aSectionMiscDirective = do
   (lineNum, fileName) <- aDirectivePreamble
-  otherFlags          <- optionMaybe aMiscDirectives
+  otherFlags          <- optionMaybe aMiscFlags
   _                   <- newline
   return $ MiscDirective {
     directive = CppDirective lineNum fileName (fromJustList otherFlags)
@@ -119,7 +119,8 @@ aEnterFileDirective = do
   (lineNum, fileName) <- aDirectivePreamble
   _ <- char ' '
   enterFlag <- aEnterFile
-  otherFlags <- aMiscDirectives
+  otherFlags <- aMiscFlags
+  _ <- newline
   return $ CppDirective lineNum fileName (enterFlag:otherFlags)
 
 aReturnFileDirective :: CppParser CppDirective
@@ -127,7 +128,8 @@ aReturnFileDirective = do
   (lineNum, fileName) <- aDirectivePreamble
   _ <- char ' '
   returnFlag <- aReturnFile
-  otherFlags <- aMiscDirectives
+  otherFlags <- aMiscFlags
+  _ <- newline
   return $ CppDirective lineNum fileName (returnFlag:otherFlags)
 
 aDirectivePreamble :: CppParser (Int, String)
@@ -145,8 +147,8 @@ aReturnFile   = char '2' >> return ReturnFile
 aSystemHeader = char '3' >> return SystemHeader
 aExternC      = char '4' >> return ExternC
 
-aMiscDirectives :: CppParser [DirectiveFlag]
-aMiscDirectives = option [] someFlags
+aMiscFlags :: CppParser [DirectiveFlag]
+aMiscFlags = option [] someFlags
   where
     someFlags = do
       sh <- optionMaybe (char ' ' >> aSystemHeader)
