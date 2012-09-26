@@ -1,66 +1,13 @@
 module Plunge.Parsers.PreprocessorOutput
   ( runCppParser
-  , prettySection
-  , Section(..)
   ) where
 
 import Text.Parsec
 import Control.Monad
-import qualified Text.PrettyPrint as PP
-import qualified Text.PrettyPrint.HughesPJClass as PPC
-import Text.PrettyPrint.HughesPJClass ((<+>), (<>))
--- import Control.Monad.Trans
 
-type LineNumber = Int
-data DirectiveFlag = EnterFile | ReturnFile | SystemHeader | ExternC
-  deriving (Ord, Eq)
-data CppDirective = CppDirective LineNumber FilePath [DirectiveFlag]
-
-instance Show CppDirective where
-  show (CppDirective n p fs) =
-    concat ["# ", (show n), " \"", p, "\" ", (unwords $ map show fs)]
-
-instance Show DirectiveFlag where
-  show EnterFile    = "1"
-  show ReturnFile   = "2"
-  show SystemHeader = "3"
-  show ExternC      = "4"
-
-data Section
-  = Block [String]
-  | MiscDirective
-      { directive :: CppDirective
-      }
-  | Expansion
-      { enterDirective   :: CppDirective
-      , returnDirective  :: CppDirective
-      , sections         :: [Section]
-      }
-  deriving (Show)
+import Plunge.Types.PreprocessorOutput
 
 type CppParser = ParsecT String () IO
-
-prettySection :: Section -> String
-prettySection s = PP.render . PPC.pPrint $ s
-
-instance PPC.Pretty Section where
-  pPrint (Block ls) = PP.vcat $ map (PP.text . (takeWhile (/= '\n'))) ls
-  pPrint (MiscDirective d) = PPC.pPrint d
-  pPrint (Expansion ed rd ss) = PP.vcat [ PPC.pPrint ed
-                                        , PP.vcat $ map PPC.pPrint ss
-                                        , PPC.pPrint rd
-                                        ]
-instance PPC.Pretty CppDirective where
-  pPrint (CppDirective n p ds) = PP.char '#'
-                             <+> (PPC.pPrint n)
-                             <+> (PP.doubleQuotes $ PP.text p)
-                             <+> (PP.hsep $ map PPC.pPrint ds)
-
-instance PPC.Pretty DirectiveFlag where
-  pPrint EnterFile    = PP.char '1'
-  pPrint ReturnFile   = PP.char '2'
-  pPrint SystemHeader = PP.char '3'
-  pPrint ExternC      = PP.char '4'
 
 --------------------------------------------------------------------------------
 
