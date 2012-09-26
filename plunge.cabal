@@ -21,4 +21,8 @@ executable plunge
   -- other-modules:
   build-depends:       base       == 4.5.*,
                        language-c == 0.4.*,
-                       bytestring == 0.9.2.*
+                       bytestring == 0.9.2.*,
+                       directory  == 1.1.*,
+                       parsec     == 3.1.*,
+                       containers == 0.4.*,
+                       mtl        == 2.1.*
