@@ -10,6 +10,4 @@ main = do
   s <- runCppParser fName
   case s of
     Left err -> putStrLn $ "ERROR: " ++ (show err)
-    Right result -> do
-                        print result
-                        mapM_ (putStrLn . prettySection) result
+    Right result -> mapM_ (putStrLn . prettySection) result

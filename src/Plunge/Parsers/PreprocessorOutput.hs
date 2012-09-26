@@ -6,6 +6,9 @@ module Plunge.Parsers.PreprocessorOutput
 
 import Text.Parsec
 import Control.Monad
+import qualified Text.PrettyPrint as PP
+import qualified Text.PrettyPrint.HughesPJClass as PPC
+import Text.PrettyPrint.HughesPJClass ((<+>), (<>))
 -- import Control.Monad.Trans
 
 type LineNumber = Int
@@ -37,20 +40,27 @@ data Section
 
 type CppParser = ParsecT String () IO
 
-showsSection :: Section -> ShowS
-showsSection (Block ls) = foldr (.) id showss
-  where
-    showss = map shower ls
-    shower l = \s -> l ++ s
-showsSection (MiscDirective d) = (\s -> (show d) ++ s)
-showsSection (Expansion od cd ss)
-  = initial . (\s -> (show cd) ++ s)
-  where
-    initial = foldr (.) id $ ((shows od) : (map (indentedSection "  ") ss))
-    indentedSection indent s = (shows indent) . (shows s)
-
 prettySection :: Section -> String
-prettySection s = showsSection s ""
+prettySection s = PP.render . PPC.pPrint $ s
+
+instance PPC.Pretty Section where
+  pPrint (Block ls) = PP.vcat $ map (PP.text . (takeWhile (/= '\n'))) ls
+  pPrint (MiscDirective d) = PPC.pPrint d
+  pPrint (Expansion ed rd ss) = PP.vcat [ PPC.pPrint ed
+                                        , PP.vcat $ map PPC.pPrint ss
+                                        , PPC.pPrint rd
+                                        ]
+instance PPC.Pretty CppDirective where
+  pPrint (CppDirective n p ds) = PP.char '#'
+                             <+> (PPC.pPrint n)
+                             <+> (PP.doubleQuotes $ PP.text p)
+                             <+> (PP.hsep $ map PPC.pPrint ds)
+
+instance PPC.Pretty DirectiveFlag where
+  pPrint EnterFile    = PP.char '1'
+  pPrint ReturnFile   = PP.char '2'
+  pPrint SystemHeader = PP.char '3'
+  pPrint ExternC      = PP.char '4'
 
 --------------------------------------------------------------------------------
 
