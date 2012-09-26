@@ -7,7 +7,9 @@ import System.Environment
 main :: IO ()
 main = do
   [fName] <- getArgs
-  s <- parsePreprocessedFile fName
+  s <- runCppParser fName
   case s of
     Left err -> putStrLn $ "ERROR: " ++ (show err)
-    Right result -> putStrLn $ prettySection result
+    Right result -> do
+                        print result
+                        mapM_ (putStrLn . prettySection) result
