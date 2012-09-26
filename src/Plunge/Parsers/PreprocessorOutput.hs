@@ -1,5 +1,6 @@
 module Plunge.Parsers.PreprocessorOutput
   ( runCppParser
+  , Section(..)
   ) where
 
 import Text.Parsec
@@ -26,10 +27,8 @@ manyTillWithEnd p end = go []
 
 --------------------------------------------------------------------------------
 
-runCppParser :: FilePath -> IO (Either ParseError [Section])
-runCppParser path = do
-  contents <- readFile path
-  runParserT aCppFile () path contents
+runCppParser :: FilePath -> String -> IO (Either ParseError [Section])
+runCppParser path contents = runParserT aCppFile () path contents
 
 aCppFile :: CppParser [Section]
 aCppFile = many aSection

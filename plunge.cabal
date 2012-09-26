@@ -27,4 +27,5 @@ executable plunge
                      containers  >= 0.4,
                      mtl         >= 2.1,
                      pretty      >= 1.1,
-                     prettyclass >= 1.0
+                     prettyclass >= 1.0,
+                     process     >= 1.1
