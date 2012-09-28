@@ -12,9 +12,13 @@ data CppDirective = CppDirective LineNumber FilePath [DirectiveFlag]
   deriving (Show)
 
 data Section
-  = Block [String]
+  = Block
+      { blockLines :: [String]
+      , startLine  :: LineNumber
+      }
   | MiscDirective
       { directive :: CppDirective
+      , startLine :: LineNumber
       }
   | Expansion
       { enterDirective   :: CppDirective

@@ -10,8 +10,8 @@ import Text.PrettyPrint.HughesPJClass ((<+>), (<>))
 renderOriginal :: Section -> String
 renderOriginal s = PP.render . originalSection $ s
 
-originalSection (Block ls) = PP.vcat $ map (PP.text . (takeWhile (/= '\n'))) ls
-originalSection (MiscDirective d) = originalCppDirective d
+originalSection (Block ls _) = PP.vcat $ map (PP.text . (takeWhile (/= '\n'))) ls
+originalSection (MiscDirective d _) = originalCppDirective d
 originalSection (Expansion ed rd _ ss) = PP.vcat [ originalCppDirective ed
                                                  , PP.vcat $ map originalSection ss
                                                  , originalCppDirective rd

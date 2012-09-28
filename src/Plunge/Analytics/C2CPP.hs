@@ -18,8 +18,8 @@ type SectionMapping = ([CLine], Section)
 c2cpp :: CData -> [Section] -> [(Int, Int, Section)]
 c2cpp d ss = map mkSpan ss
   where
-    mkSpan s@(Block _)         = (-1, -1, s)
-    mkSpan s@(MiscDirective _) = (-1, -1, s)
+    mkSpan s@(Block ls sn)         = (sn, sn + (length ls), s)
+    mkSpan s@(MiscDirective _ sn)  = (sn, sn, s)
     mkSpan s@(Expansion ed rd n _) =
       let (CppDirective start _ _) = ed
           (CppDirective stop  _ _) = rd

@@ -41,6 +41,7 @@ aSection = (try aSectionMiscDirective)
 
 aSectionMiscDirective :: CppParser Section
 aSectionMiscDirective = do
+  n <- getState
   (lineNum, fileName) <- aDirectivePreamble
   otherFlags          <- optionMaybe aMiscFlags
   _                   <- newline
@@ -48,7 +49,8 @@ aSectionMiscDirective = do
   lift $ putStrLn $ "MiscDir " ++ (show lineNum)
   modifyState (\_ -> lineNum)
   return $ MiscDirective {
-    directive = CppDirective lineNum fileName (fromJustList otherFlags)
+    directive = CppDirective lineNum fileName (fromJustList otherFlags),
+    startLine = n
   }
   where
     fromJustList jlst = case jlst of
@@ -73,12 +75,16 @@ aSectionExpansion = do
     }
 
 aSectionBlock :: CppParser Section
-aSectionBlock = liftM Block (many1 plainLine)
+aSectionBlock = do
+  n  <- getState
+  ls <- many1 plainLine
+
+  modifyState (\n -> n + (length ls))
+  return $ Block ls n
   where
     plainLine = do
       _ <- lookAhead $ noneOf "#"
       (l, nl) <- manyTillWithEnd anyChar (try newline)
-      modifyState (\n -> n + 1)
       return $ l ++ [nl]
 
 aEnterFileDirective :: CppParser CppDirective
