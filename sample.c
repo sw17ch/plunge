@@ -1,4 +1,6 @@
 #include "sample.h"
+#include "foo.h"
+#include "bar.h"
 
 int foo(int x) {
   return ADD_THINGS(x, 5);

@@ -5,10 +5,11 @@ module Plunge.Parsers.PreprocessorOutput
 
 import Text.Parsec
 import Control.Monad
+import Control.Monad.Trans
 
 import Plunge.Types.PreprocessorOutput
 
-type CppParser = ParsecT String () IO
+type CppParser = ParsecT String LineNumber IO
 
 --------------------------------------------------------------------------------
 
@@ -28,7 +29,7 @@ manyTillWithEnd p end = go []
 --------------------------------------------------------------------------------
 
 runCppParser :: FilePath -> String -> IO (Either ParseError [Section])
-runCppParser path contents = runParserT aCppFile () path contents
+runCppParser path contents = runParserT aCppFile 1 path contents
 
 aCppFile :: CppParser [Section]
 aCppFile = many aSection
@@ -43,6 +44,9 @@ aSectionMiscDirective = do
   (lineNum, fileName) <- aDirectivePreamble
   otherFlags          <- optionMaybe aMiscFlags
   _                   <- newline
+
+  lift $ putStrLn $ "MiscDir " ++ (show lineNum)
+  modifyState (\_ -> lineNum)
   return $ MiscDirective {
     directive = CppDirective lineNum fileName (fromJustList otherFlags)
   }
@@ -54,11 +58,17 @@ aSectionMiscDirective = do
 
 aSectionExpansion :: CppParser Section
 aSectionExpansion = do
-  ed         <- aEnterFileDirective
+  num <- getState
+  ed@(CppDirective n _ _) <- aEnterFileDirective
   (secs, rd) <- aSection `manyTillWithEnd` (try aReturnFileDirective)
+  let (CppDirective rdNum _ _) = rd
+
+  lift $ putStrLn $ "Expansion " ++ (show rdNum)
+  modifyState (\_ -> rdNum)
   return $ Expansion
     { enterDirective  = ed
     , returnDirective = rd
+    , startLine       = num
     , sections        = secs
     }
 
@@ -68,6 +78,7 @@ aSectionBlock = liftM Block (many1 plainLine)
     plainLine = do
       _ <- lookAhead $ noneOf "#"
       (l, nl) <- manyTillWithEnd anyChar (try newline)
+      modifyState (\n -> n + 1)
       return $ l ++ [nl]
 
 aEnterFileDirective :: CppParser CppDirective

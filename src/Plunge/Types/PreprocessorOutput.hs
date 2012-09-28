@@ -19,6 +19,7 @@ data Section
   | Expansion
       { enterDirective   :: CppDirective
       , returnDirective  :: CppDirective
+      , startLine        :: LineNumber
       , sections         :: [Section]
       }
   deriving (Show)
