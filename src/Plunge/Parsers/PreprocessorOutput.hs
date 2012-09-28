@@ -4,8 +4,8 @@ module Plunge.Parsers.PreprocessorOutput
   ) where
 
 import Text.Parsec
-import Control.Monad
-import Control.Monad.Trans
+-- import Control.Monad
+-- import Control.Monad.Trans
 
 import Plunge.Types.PreprocessorOutput
 
@@ -46,7 +46,6 @@ aSectionMiscDirective = do
   otherFlags          <- optionMaybe aMiscFlags
   _                   <- newline
 
-  lift $ putStrLn $ "MiscDir " ++ (show lineNum)
   modifyState (\_ -> lineNum)
   return $ MiscDirective {
     directive = CppDirective lineNum fileName (fromJustList otherFlags),
@@ -61,11 +60,10 @@ aSectionMiscDirective = do
 aSectionExpansion :: CppParser Section
 aSectionExpansion = do
   num <- getState
-  ed@(CppDirective n _ _) <- aEnterFileDirective
+  ed <- aEnterFileDirective
   (secs, rd) <- aSection `manyTillWithEnd` (try aReturnFileDirective)
   let (CppDirective rdNum _ _) = rd
 
-  lift $ putStrLn $ "Expansion " ++ (show rdNum)
   modifyState (\_ -> rdNum)
   return $ Expansion
     { enterDirective  = ed
@@ -76,11 +74,11 @@ aSectionExpansion = do
 
 aSectionBlock :: CppParser Section
 aSectionBlock = do
-  n  <- getState
+  startLn  <- getState
   ls <- many1 plainLine
 
   modifyState (\n -> n + (length ls))
-  return $ Block ls n
+  return $ Block ls startLn
   where
     plainLine = do
       _ <- lookAhead $ noneOf "#"

@@ -1,10 +1,10 @@
 module Main where
 
-import Text.Parsec
+-- import Text.Parsec
+-- import Plunge.Parsers.C
+-- import Plunge.Printers.PreprocessorOutput
 
-import Plunge.Parsers.C
 import Plunge.Parsers.PreprocessorOutput
-import Plunge.Printers.PreprocessorOutput
 import Plunge.Preprocessor
 import Plunge.Analytics.C2CPP
 
@@ -23,11 +23,8 @@ main = do
       parsed <- runCppParser path cpp
       case parsed of
         Left err -> putStrLn $ "ERROR: " ++ (show err)
-        Right result -> analyze path result
-    analyze :: FilePath -> [Section] -> IO ()
-    analyze path parsed = do
-      c <- readFile path
-      print $ c2cpp c parsed
+        Right result -> analyze result
+    analyze parsed = print $ spans parsed
 
 parseArguments :: IO FilePath
 parseArguments = do
