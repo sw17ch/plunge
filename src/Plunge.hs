@@ -6,22 +6,28 @@ import Plunge.Parsers.C
 import Plunge.Parsers.PreprocessorOutput
 import Plunge.Printers.PreprocessorOutput
 import Plunge.Preprocessor
+import Plunge.Analytics.C2CPP
 
 import System.Environment
 
 main :: IO ()
 main = do
-  fName <- parseArguments
-  cppResult <- preprocessFile fName []
+  fPath <- parseArguments
+  cppResult <- preprocessFile fPath []
   case cppResult of
     Left err  -> outputPreprocessorError err
-    Right out -> runCppParser fName out >>= doStuff
+    Right out -> parse fPath out
 
   where
-    doStuff parsed = do
+    parse path cpp = do
+      parsed <- runCppParser path cpp
       case parsed of
         Left err -> putStrLn $ "ERROR: " ++ (show err)
-        Right result -> mapM_ (putStrLn . renderOriginal) result
+        Right result -> analyze path result
+    analyze :: FilePath -> [Section] -> IO ()
+    analyze path parsed = do
+      c <- readFile path
+      print $ c2cpp c parsed
 
 parseArguments :: IO FilePath
 parseArguments = do
