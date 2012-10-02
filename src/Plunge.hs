@@ -10,6 +10,8 @@ import Plunge.Analytics.C2CPP
 
 import System.Environment
 
+import Text.Show.Pretty
+
 main :: IO ()
 main = do
   fPath <- parseArguments
@@ -23,8 +25,11 @@ main = do
       parsed <- runCppParser path cpp
       case parsed of
         Left err -> putStrLn $ "ERROR: " ++ (show err)
-        Right result -> analyze result
-    analyze parsed = print $ spans parsed
+        Right result -> analyze path result
+    analyze path parsed = do
+      let ss = spans parsed
+      cLines <- readFile path
+      putStrLn $ ppShow $ pairSpan (ss, lines cLines)
 
 parseArguments :: IO FilePath
 parseArguments = do
