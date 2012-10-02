@@ -5,26 +5,28 @@ module Plunge.Printers.PreprocessorOutput
 
 import Plunge.Types.PreprocessorOutput
 
-import qualified Text.PrettyPrint as PP
-import Text.PrettyPrint.HughesPJClass ((<+>), (<>))
+import Text.PrettyPrint
 
 renderOriginal :: Section -> String
-renderOriginal s = PP.render . originalSection $ s
+renderOriginal s = render . originalSection $ s
 
-originalSection (Block ls _) = PP.vcat $ map (PP.text . (takeWhile (/= '\n'))) ls
+originalSection :: Section -> Doc
+originalSection (Block ls _) = vcat $ map (text . (takeWhile (/= '\n'))) ls
 originalSection (MiscDirective d _) = originalCppDirective d
-originalSection (Expansion ed rd _ ss) = PP.vcat [ originalCppDirective ed
-                                                 , PP.vcat $ map originalSection ss
-                                                 , originalCppDirective rd
-                                                 ]
+originalSection (Expansion ed rd _ ss) = vcat [ originalCppDirective ed
+                                              , vcat $ map originalSection ss
+                                              , originalCppDirective rd
+                                              ]
 
+originalCppDirective :: CppDirective -> Doc
 originalCppDirective (CppDirective n p ds)
-    = PP.char '#'
-  <+> (PP.int n)
-  <+> (PP.doubleQuotes $ PP.text p)
-  <+> (PP.hsep $ map originalDirectiveFlag ds)
+    = char '#'
+  <+> (int n)
+  <+> (doubleQuotes $ text p)
+  <+> (hsep $ map originalDirectiveFlag ds)
 
-originalDirectiveFlag EnterFile    = PP.char '1'
-originalDirectiveFlag ReturnFile   = PP.char '2'
-originalDirectiveFlag SystemHeader = PP.char '3'
-originalDirectiveFlag ExternC      = PP.char '4'
+originalDirectiveFlag :: DirectiveFlag -> Doc
+originalDirectiveFlag EnterFile    = char '1'
+originalDirectiveFlag ReturnFile   = char '2'
+originalDirectiveFlag SystemHeader = char '3'
+originalDirectiveFlag ExternC      = char '4'

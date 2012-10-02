@@ -4,9 +4,6 @@ module Plunge.Parsers.PreprocessorOutput
   ) where
 
 import Text.Parsec
--- import Control.Monad
--- import Control.Monad.Trans
-
 import Plunge.Types.PreprocessorOutput
 
 type CppParser = ParsecT String LineNumber IO

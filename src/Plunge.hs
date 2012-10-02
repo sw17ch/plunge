@@ -1,18 +1,11 @@
 module Main where
 
--- import Text.Parsec
--- import Plunge.Parsers.C
--- import Plunge.Printers.PreprocessorOutput
-
 import Plunge.Parsers.PreprocessorOutput
 import Plunge.Preprocessor
 import Plunge.Analytics.C2CPP
 import Plunge.Printers.Analytics
 
-
 import System.Environment
-
-import Text.Show.Pretty
 
 main :: IO ()
 main = do
@@ -32,9 +25,8 @@ main = do
       let ss = spans parsed
       cLines <- readFile path
       let pairs = pairSpans ss (map (++ "\n") $ lines cLines)
-      putStrLn $ concat $ map fst $ concatMap snd pairs
       let spanPairs = pairSpanLinesWithCLines pairs
-      putStrLn $ ppShow $ spanPairs
+      putStrLn $ renderC2Cpp spanPairs
 
 parseArguments :: IO FilePath
 parseArguments = do

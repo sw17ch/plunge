@@ -26,16 +26,16 @@ pairSpans :: [Span] -> [CLine] -> [SpanPair]
 pairSpans cppSpans cLines = unfoldr pairer (cppSpans, zip cLines lineNums)
   where
     lineNums = [1..]
-    pairer :: ([Span], [(CLine, LineNum)])
-           -> Maybe ((Maybe Span, [(CLine,LineNum)]), ([Span], [(CLine, LineNum)]))
-    pairer ([],   []) = Nothing
-    pairer ([],   ls) = Just ((Nothing, ls), ([], []))
-    pairer (s:ss, []) = Just ((Just s, []), (ss, []))
-    pairer (ss@(s:ss'), ls) | n < from  = let (ls',rest) = span (\(_,n') -> n' < from) ls
+    pairer ([],   []) = Nothing -- We're done!
+    pairer ([],   ls) = Just ((Nothing, ls), ([], [])) -- Only lines remain.
+    pairer (s:ss, []) = Just ((Just s, []), (ss, [])) -- Only spans remain.
+    -- We still have spans and lines. Consume the proper lines and spans.
+    pairer (ss@(s:ss'), ls) | n < from  = let (ls',rest) = span (lineLessThan from) ls
                                           in Just ((Nothing, ls'), (ss, rest))
-                            | otherwise = let (ls',rest) = span (\(_,n') -> n' < to) ls
+                            | otherwise = let (ls',rest) = span (lineLessThan to) ls
                                           in Just ((Just s, ls'), (ss', rest))
       where
+        lineLessThan x (_,lineNum) = lineNum < x
         (Span from to _):_ = ss
         (_,n):_            = ls
 
