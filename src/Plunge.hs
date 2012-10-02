@@ -7,6 +7,8 @@ module Main where
 import Plunge.Parsers.PreprocessorOutput
 import Plunge.Preprocessor
 import Plunge.Analytics.C2CPP
+import Plunge.Printers.Analytics
+
 
 import System.Environment
 
@@ -29,7 +31,10 @@ main = do
     analyze path parsed = do
       let ss = spans parsed
       cLines <- readFile path
-      putStrLn $ ppShow $ pairSpans ss (lines cLines)
+      let pairs = pairSpans ss (map (++ "\n") $ lines cLines)
+      putStrLn $ concat $ map fst $ concatMap snd pairs
+      let spanPairs = pairSpanLinesWithCLines pairs
+      putStrLn $ ppShow $ spanPairs
 
 parseArguments :: IO FilePath
 parseArguments = do

@@ -1,5 +1,6 @@
 module Plunge.Printers.PreprocessorOutput
   ( renderOriginal
+  , originalCppDirective 
   ) where
 
 import Plunge.Types.PreprocessorOutput
