@@ -1,6 +1,5 @@
 #include "sample.h"
 #include "foo.h"
-#include "bar.h"
 
 #define A_DEFN(x) \
   struct a_struct_named_##x { \
