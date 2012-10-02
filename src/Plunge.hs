@@ -29,7 +29,7 @@ main = do
     analyze path parsed = do
       let ss = spans parsed
       cLines <- readFile path
-      putStrLn $ ppShow $ pairSpan (ss, lines cLines)
+      putStrLn $ ppShow $ pairSpan ss (lines cLines)
 
 parseArguments :: IO FilePath
 parseArguments = do

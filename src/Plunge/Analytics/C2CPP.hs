@@ -23,8 +23,13 @@ spans ss = map mkSpan ss
 type CLine = String
 type CppLine = String
 
-pairSpan :: ([Span], [CLine]) -> [(Maybe Span, [(CLine, Int)])]
-pairSpan (ss, ls) = unfoldr pairer (ss, zip ls lineNums)
+-- |Given an ordered list of spans, and an ordered list of lines, pairSpan
+-- produces a list of (Maybe Span -> [(CLine, LineNum)]) mappings. When a span
+-- has no associated lines from the original C file, it is paired with an empty
+-- list. When a set of lines from the C file has no corresponding span from the
+-- preprocessed text, it is paired with Nothing.
+pairSpan :: [Span] -> [CLine] -> [(Maybe Span, [(CLine, Int)])]
+pairSpan cppSpans cLines = unfoldr pairer (cppSpans, zip cLines lineNums)
   where
     lineNums = [1..]
     pairer :: ([Span], [(CLine, Int)]) -> Maybe ((Maybe Span, [(CLine,Int)]), ([Span], [(CLine, Int)]))
