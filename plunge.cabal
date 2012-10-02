@@ -28,4 +28,5 @@ executable plunge
                      mtl         >= 2.1,
                      pretty      >= 1.1,
                      prettyclass >= 1.0,
-                     process     >= 1.1
+                     process     >= 1.1,
+                     pretty-show >= 1.2
