@@ -1,6 +1,6 @@
 module Plunge.Analytics.C2CPP
   ( spans
-  , pairSpan
+  , pairSpans
   ) where
 
 import Data.List
@@ -28,8 +28,8 @@ type CppLine = String
 -- has no associated lines from the original C file, it is paired with an empty
 -- list. When a set of lines from the C file has no corresponding span from the
 -- preprocessed text, it is paired with Nothing.
-pairSpan :: [Span] -> [CLine] -> [(Maybe Span, [(CLine, Int)])]
-pairSpan cppSpans cLines = unfoldr pairer (cppSpans, zip cLines lineNums)
+pairSpans :: [Span] -> [CLine] -> [(Maybe Span, [(CLine, Int)])]
+pairSpans cppSpans cLines = unfoldr pairer (cppSpans, zip cLines lineNums)
   where
     lineNums = [1..]
     pairer :: ([Span], [(CLine, Int)]) -> Maybe ((Maybe Span, [(CLine,Int)]), ([Span], [(CLine, Int)]))
