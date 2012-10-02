@@ -4,11 +4,9 @@ module Plunge.Parsers.PreprocessorOutput
   ) where
 
 import Text.Parsec
-import Control.Monad
-
 import Plunge.Types.PreprocessorOutput
 
-type CppParser = ParsecT String () IO
+type CppParser = ParsecT String LineNumber IO
 
 --------------------------------------------------------------------------------
 
@@ -28,7 +26,7 @@ manyTillWithEnd p end = go []
 --------------------------------------------------------------------------------
 
 runCppParser :: FilePath -> String -> IO (Either ParseError [Section])
-runCppParser path contents = runParserT aCppFile () path contents
+runCppParser path contents = runParserT aCppFile 1 path contents
 
 aCppFile :: CppParser [Section]
 aCppFile = many aSection
@@ -40,11 +38,15 @@ aSection = (try aSectionMiscDirective)
 
 aSectionMiscDirective :: CppParser Section
 aSectionMiscDirective = do
+  n <- getState
   (lineNum, fileName) <- aDirectivePreamble
   otherFlags          <- optionMaybe aMiscFlags
   _                   <- newline
+
+  modifyState (\_ -> lineNum)
   return $ MiscDirective {
-    directive = CppDirective lineNum fileName (fromJustList otherFlags)
+    directive = CppDirective lineNum fileName (fromJustList otherFlags),
+    startLine = n
   }
   where
     fromJustList jlst = case jlst of
@@ -54,16 +56,26 @@ aSectionMiscDirective = do
 
 aSectionExpansion :: CppParser Section
 aSectionExpansion = do
-  ed         <- aEnterFileDirective
+  num <- getState
+  ed <- aEnterFileDirective
   (secs, rd) <- aSection `manyTillWithEnd` (try aReturnFileDirective)
+  let (CppDirective rdNum _ _) = rd
+
+  modifyState (\_ -> rdNum)
   return $ Expansion
     { enterDirective  = ed
     , returnDirective = rd
+    , startLine       = num
     , sections        = secs
     }
 
 aSectionBlock :: CppParser Section
-aSectionBlock = liftM Block (many1 plainLine)
+aSectionBlock = do
+  startLn  <- getState
+  ls <- many1 plainLine
+
+  modifyState (\n -> n + (length ls))
+  return $ Block ls startLn
   where
     plainLine = do
       _ <- lookAhead $ noneOf "#"
