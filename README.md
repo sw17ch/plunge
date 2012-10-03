@@ -24,7 +24,7 @@ int main(int argc, char * argv[]) {
 If we name this file `boop.c`, and we run plunge over it, we will see the
 following output:
 
-```
+```C
 ************************************   # 1 "example.c"
 ************************************   # 1 "<built-in>"
 ************************************   # 1 "<command-line>"
