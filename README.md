@@ -33,7 +33,7 @@ following output:
 
 int main(int argc, char * argv[]) {    int main(int argc, char * argv[]) {
     return BOOP;                           return (999);
-}
+}                                      }
 ```
 
 The left hand side of this output is the original C file. The right hand side
