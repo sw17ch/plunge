@@ -10,6 +10,8 @@ Usage
 Build
 -----
 
+You'll need the [Haskell Platform](http://www.haskell.org/platform/) or other equivalent Haskell configuration.
+
 ```sh
 git clone https://github.com/sw17ch/plunge.git
 cd plunge
