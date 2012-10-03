@@ -5,16 +5,14 @@ module Plunge.Printers.Analytics
 import Plunge.Types.PreprocessorOutput
 import Text.PrettyPrint
 
--- import Text.PrettyPrint.HughesPJClass ((<+>), (<>), ($$), ($+$))
-
 renderC2Cpp :: [C2Cpp] -> String
 renderC2Cpp = render . formatC2Cpp
 
 formatC2Cpp :: [C2Cpp] -> Doc
 formatC2Cpp ls =
-  let cLines = map (cLineToText . fst) ls
+  let cLines   = map (cLineToText . fst) ls
       cppLines = map (cppLineToText . snd) ls
-      nested = map (nest (longestCLine + 3)) cppLines
+      nested   = map (nest (longestCLine + 3)) cppLines
   in vcat $ zipWith ($$) cLines nested
   where
     chomp = takeWhile (/= '\n')
