@@ -7,6 +7,30 @@ An exploratory tool for the C Language.
 Usage
 =====
 
+Build
+-----
+
+```sh
+git clone https://github.com/sw17ch/plunge.git
+cd plunge
+cabal install --only-dependencies
+cabal configure
+cabal build
+```
+
+Execute
+-------
+
+After running the above command, the binary will be located at:
+`./dist/build/plunge/plunge`. You can run the program like this:
+
+```sh
+./dist/build/plunge/plunge [your_file.c]
+```
+
+Explanation
+-----------
+
 Right now, it's pretty simple. Feed it a C file, and it will use a `gcc` from
 your path and output a table representing what parts of your C file become
 equivalent parts of the preprocessed file.
