@@ -38,16 +38,19 @@ aSection = (try aSectionMiscDirective)
 
 aSectionMiscDirective :: CppParser Section
 aSectionMiscDirective = do
+  p0 <- getPosition
   n <- getState
   (lineNum, fileName) <- aDirectivePreamble
   otherFlags          <- optionMaybe aMiscFlags
   _                   <- newline
+  p1 <- getPosition
 
   modifyState (\_ -> lineNum)
-  return $ MiscDirective {
-    directive = CppDirective lineNum fileName (fromJustList otherFlags),
-    startLine = n
-  }
+  return $ MiscDirective
+    { directive = CppDirective lineNum fileName (fromJustList otherFlags)
+    , startLine = n
+    , miscDirectiveCppSpan = (sourceLine p0, sourceLine p1)
+    }
   where
     fromJustList jlst = case jlst of
                              Nothing  -> []
@@ -56,26 +59,31 @@ aSectionMiscDirective = do
 
 aSectionExpansion :: CppParser Section
 aSectionExpansion = do
+  p0 <- getPosition
   num <- getState
   ed <- aEnterFileDirective
   (secs, rd) <- aSection `manyTillWithEnd` (try aReturnFileDirective)
   let (CppDirective rdNum _ _) = rd
+  p1 <- getPosition
 
   modifyState (\_ -> rdNum)
   return $ Expansion
-    { enterDirective  = ed
-    , returnDirective = rd
-    , startLine       = num
-    , sections        = secs
+    { enterDirective   = ed
+    , returnDirective  = rd
+    , startLine        = num
+    , sections         = secs
+    , expansionCppSpan = (sourceLine p0, sourceLine p1)
     }
 
 aSectionBlock :: CppParser Section
 aSectionBlock = do
+  p0 <- getPosition
   startLn  <- getState
   ls <- many1 plainLine
+  p1 <- getPosition
 
   modifyState (\n -> n + (length ls))
-  return $ Block ls startLn
+  return $ Block ls startLn (sourceLine p0, sourceLine p1)
   where
     plainLine = do
       _ <- lookAhead $ noneOf "#"

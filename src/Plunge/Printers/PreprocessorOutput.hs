@@ -11,12 +11,12 @@ renderOriginal :: Section -> String
 renderOriginal s = render . originalSection $ s
 
 originalSection :: Section -> Doc
-originalSection (Block ls _) = vcat $ map (text . (takeWhile (/= '\n'))) ls
-originalSection (MiscDirective d _) = originalCppDirective d
-originalSection (Expansion ed rd _ ss) = vcat [ originalCppDirective ed
-                                              , vcat $ map originalSection ss
-                                              , originalCppDirective rd
-                                              ]
+originalSection (Block ls _ _) = vcat $ map (text . (takeWhile (/= '\n'))) ls
+originalSection (MiscDirective d _ _) = originalCppDirective d
+originalSection (Expansion ed rd _ ss _) = vcat [ originalCppDirective ed
+                                                , vcat $ map originalSection ss
+                                                , originalCppDirective rd
+                                                ]
 
 originalCppDirective :: CppDirective -> Doc
 originalCppDirective (CppDirective n p ds)

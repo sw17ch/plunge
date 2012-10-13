@@ -4,6 +4,7 @@ module Plunge.Types.PreprocessorOutput
   , DirectiveFlag(..)
   , C2Cpp
   , Span(..)
+  , NuSpanPair(..)
   , CLine
   , SpanPair
   , CppLine
@@ -21,16 +22,19 @@ data Section
   = Block
       { blockLines :: [String]
       , startLine  :: LineNumber
+      , blockCppSpan    :: (FromLine, ToLine)
       }
   | MiscDirective
-      { directive :: CppDirective
-      , startLine :: LineNumber
+      { directive            :: CppDirective
+      , startLine            :: LineNumber
+      , miscDirectiveCppSpan :: (FromLine, ToLine)
       }
   | Expansion
       { enterDirective   :: CppDirective
       , returnDirective  :: CppDirective
       , startLine        :: LineNumber
       , sections         :: [Section]
+      , expansionCppSpan :: (FromLine, ToLine)
       }
   deriving (Show)
 
@@ -38,11 +42,17 @@ data Span = Span { fromLine :: FromLine
                  , toLine   :: ToLine
                  , section  :: Section
                  } deriving (Show)
+
+data NuSpanPair = NuSpanPair { cSpan   :: Maybe (FromLine, ToLine)
+                             , cppSpan :: Maybe (FromLine, ToLine)
+                             } deriving (Show)
+
 type FromLine = Int
 type ToLine   = Int
 
 type LineNum  = Int
 type SpanPair = (Maybe Span, [(CLine, LineNum)])
+
 
 type CLine   = String
 type CppLine = String

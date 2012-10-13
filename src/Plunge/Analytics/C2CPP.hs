@@ -1,5 +1,6 @@
 module Plunge.Analytics.C2CPP
   ( spans
+  , nuSpans
   , pairSpans
   , pairSpanLinesWithCLines
   ) where
@@ -8,13 +9,24 @@ import Data.List
 import Plunge.Types.PreprocessorOutput
 import Plunge.Printers.PreprocessorOutput
 
-spans :: [Section] -> [Span]
-spans ss = map mkSpan ss
+----------------------------------------------------------------------
+nuSpans :: [Section] -> [NuSpan]
+nuSpans ss = map mkSpan ss
   where
     mkSpan s@(Block ls sn)         = Span sn (sn + (length ls)) s
     mkSpan s@(MiscDirective _ sn)  = Span sn sn s
     mkSpan s@(Expansion _ rd n _)  =
       let (CppDirective stop  _ _) = rd
+      in Span n stop s
+----------------------------------------------------------------------
+
+spans :: [Section] -> [Span]
+spans ss = map mkSpan ss
+  where
+    mkSpan s@(Block ls sn _)         = Span sn (sn + (length ls)) s
+    mkSpan s@(MiscDirective _ sn _)  = Span sn sn s
+    mkSpan s@(Expansion _ rd n _ _)  =
+      let (CppDirective stop _ _) = rd
       in Span n stop s
 
 -- |Given an ordered list of spans, and an ordered list of lines, pairSpan
@@ -60,10 +72,10 @@ mkPairs pair =
 section2LineAndNesting :: Section -> [(CppLine, Nesting)]
 section2LineAndNesting sec = s2lan 0 sec
   where showCppDir d = show $ originalCppDirective d
-        s2lan n (Block ls _) = zip ls (repeat n)
-        s2lan n (MiscDirective d _) = [(showCppDir d, n)]
-        s2lan n (Expansion e r _ []) = [(showCppDir e,n), (showCppDir r,n)]
-        s2lan n (Expansion e r _ ss) =
+        s2lan n (Block ls _ _) = zip ls (repeat n)
+        s2lan n (MiscDirective d _ _) = [(showCppDir d, n)]
+        s2lan n (Expansion e r _ [] _) = [(showCppDir e,n), (showCppDir r,n)]
+        s2lan n (Expansion e r _ ss _) =
           let rest = concatMap (s2lan (n + 1)) ss
               e' = (showCppDir e, n)
               r' = (showCppDir r, n)
