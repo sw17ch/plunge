@@ -1,6 +1,6 @@
 module Plunge.Printers.PreprocessorOutput
   ( renderOriginal
-  , originalCppDirective 
+  , originalCppDirective
   ) where
 
 import Plunge.Types.PreprocessorOutput
@@ -12,7 +12,7 @@ renderOriginal s = render . originalSection $ s
 
 originalSection :: Section -> Doc
 originalSection (Block ls _ _) = vcat $ map (text . (takeWhile (/= '\n'))) ls
-originalSection (MiscDirective d _ _) = originalCppDirective d
+originalSection (MiscDirective d _) = originalCppDirective d
 originalSection (Expansion ed rd _ ss _) = vcat [ originalCppDirective ed
                                                 , vcat $ map originalSection ss
                                                 , originalCppDirective rd

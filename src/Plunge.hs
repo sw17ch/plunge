@@ -3,7 +3,6 @@ module Main where
 import Plunge.Parsers.PreprocessorOutput
 import Plunge.Preprocessor
 import Plunge.Analytics.C2CPP
-import Plunge.Printers.Analytics
 
 import System.Environment
 
@@ -20,13 +19,8 @@ main = do
       parsed <- runCppParser path cpp
       case parsed of
         Left err -> putStrLn $ "ERROR: " ++ (show err)
-        Right result -> analyze path result
-    analyze path parsed = do
-      let ss = spans parsed
-      cLines <- readFile path
-      let pairs = pairSpans ss (map (++ "\n") $ lines cLines)
-      let spanPairs = pairSpanLinesWithCLines pairs
-      putStrLn $ renderC2Cpp spanPairs
+        Right result -> analyze result
+    analyze result = print $ lineAssociations result
 
 parseArguments :: IO FilePath
 parseArguments = do
