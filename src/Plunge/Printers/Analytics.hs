@@ -1,29 +1,38 @@
 module Plunge.Printers.Analytics
-  ( renderC2Cpp
+  ( renderAssociation 
   ) where
 
 import Plunge.Types.PreprocessorOutput
 import Text.PrettyPrint
 
-renderC2Cpp :: [C2Cpp] -> String
-renderC2Cpp = render . formatC2Cpp
+type CLine = String
+type CppLine = String
 
-formatC2Cpp :: [C2Cpp] -> Doc
-formatC2Cpp ls =
-  let cLines   = map (cLineToText . fst) ls
-      cppLines = map (cppLineToText . snd) ls
-      nested   = map (nest (longestCLine + 3)) cppLines
-  in vcat $ zipWith ($$) cLines nested
+lrToTuple (LineRange fl tl) = (fl, tl)
+
+rangeSize Nothing = 0
+rangeSize (Just (LineRange fl tl)) = tl - fl
+
+subList :: (Int, Int) -> [a] -> [a]
+subList (begin, end) lines = take (end - begin) . drop begin $ lines
+
+renderAssociation :: [LineAssociation] -> [CLine] -> [CppLine] -> String
+renderAssociation las cls cppls =
+  concat $ map render las
   where
-    chomp = takeWhile (/= '\n')
-    asterisks = repeat '*'
-    longestCLine = maximum $ map (cLineLength . fst) ls
-    cLineLength Nothing = 0
-    cLineLength (Just l) = length l
-    cLineToText (Just l) = text $ chomp l
-    cLineToText _ = text $ take longestCLine asterisks
-    longestCppLine = maximum $ map (cppLineLength . snd) ls
-    cppLineLength Nothing = 0
-    cppLineLength (Just (l, _)) = length l
-    cppLineToText Nothing = text $ take longestCppLine asterisks
-    cppLineToText (Just (l, _)) = text $ chomp l
+    longestCLine = maximum $ map length cls
+    longestCppLine = maximum $ map length cppls
+    emptyCLines = repeat $ take longestCLine $ repeat '~'
+    emptyCppLines = repeat $ take longestCppLine $ repeat '~'
+    render la =
+      let cSize = rangeSize $ cRange la
+          cppSize = rangeSize $ cppRange la
+          assocSize = max cSize cppSize
+          cLines = case cRange la of
+                     (Just lr) -> subList (lrToTuple lr) cls
+                     Nothing -> []
+          cppLines = case cppRange la of
+                       (Just lr) -> subList (lrToTuple lr) cppls
+                       Nothing -> []
+          assoc = zip (take assocSize (cLines ++ emptyCLines)) (take assocSize (cppLines ++ emptyCppLines))
+      in unlines $ map (\(c, p) -> c ++ " ||| " ++ p) assoc
