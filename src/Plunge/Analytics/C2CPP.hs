@@ -13,10 +13,10 @@ lineAssociations ss = concat $ snd $ mapAccumL fillGap 1 assocs
     fillGap :: LineNumber -> LineAssociation -> (LineNumber, [LineAssociation])
     fillGap n (LineAssociation Nothing Nothing) = (n, [])
     fillGap n a@(LineAssociation Nothing (Just _)) = (n, [a])
-    fillGap _ a@(LineAssociation (Just clr) Nothing) = (toLine clr, [a])
-    fillGap n a@(LineAssociation (Just clr) (Just _)) | n < cTo = (cTo + 1,  [gap, a]) -- WWWHHHYYYYYY
-                                                      | n == cTo = (cTo, [a])
-                                                      | otherwise = (n, []) -- n > cTo
+    fillGap n a@(LineAssociation (Just clr) Nothing) = (toLine clr, [a])
+    fillGap n a@(LineAssociation (Just clr) (Just _)) | n < cFrom = (cTo, [gap, a])
+                                                      | n == cFrom = (cTo, [a])
+                                                      | otherwise = (n, []) -- n > cFrom
       where cTo = toLine clr
             cFrom = fromLine clr
             gap = LineAssociation (Just $ LineRange n cFrom) Nothing
