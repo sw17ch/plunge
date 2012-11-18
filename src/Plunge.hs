@@ -1,7 +1,6 @@
 module Main where
 
 import Plunge.Parsers.PreprocessorOutput
-import Plunge.Types.PreprocessorOutput
 import Plunge.Preprocessor
 import Plunge.Analytics.C2CPP
 import Plunge.Printers.Analytics
@@ -9,7 +8,6 @@ import Control.Monad
 
 import System.Environment
 
-import Text.Printf
 
 main :: IO ()
 main = do
@@ -28,7 +26,6 @@ main = do
         Right result -> analyze result cLines (lines cpp)
     analyze result cLines cppLines = do
       let assocs = lineAssociations result
-      layout $ assocs
       putStrLn $ renderAssociation assocs cLines cppLines
 
 parseArguments :: IO FilePath
@@ -42,9 +39,3 @@ outputPreprocessorError e = do
                  , "--------------------"
                  , e
                  ]
-
-layout :: [LineAssociation] -> IO ()
-layout assocs = do
-  mapM_ pf assocs
-  where
-    pf assoc = printf "%50s :: %50s\n" (show $ cRange assoc) (show $ cppRange assoc)
