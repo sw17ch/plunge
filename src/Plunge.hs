@@ -18,19 +18,19 @@ main = do
 
   case cppResult of
     Left err  -> outputPreprocessorError err
-    Right cppData -> parse (inputFile opts) cData cppData
+    Right cppData -> parse opts (inputFile opts) cData cppData
 
-parse :: FilePath -> String -> String -> IO ()
-parse fileName cData cppData = do
+parse :: Options -> FilePath -> String -> String -> IO ()
+parse opts fileName cData cppData = do
   parsed <- runCppParser fileName cppData
   case parsed of
     Left err -> putStrLn $ "ERROR: " ++ (show err)
-    Right result -> analyze result (lines cData) (lines cppData)
+    Right result -> analyze opts result (lines cData) (lines cppData)
 
-analyze :: [Section] -> [CLine] -> [CppLine] -> IO ()
-analyze result cLines cppLines = do
+analyze :: Options -> [Section] -> [CLine] -> [CppLine] -> IO ()
+analyze opts result cLines cppLines = do
   let assocs = lineAssociations result
-  putStrLn $ renderAssociation assocs cLines cppLines
+  putStrLn $ renderAssociation opts assocs cLines cppLines
 
 outputPreprocessorError :: CppError -> IO ()
 outputPreprocessorError e = do
