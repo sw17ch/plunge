@@ -3,16 +3,9 @@ module Plunge.Printers.Analytics
   ) where
 
 import Plunge.Types.PreprocessorOutput
+import Plunge.Options
 import Data.List
-
-type CLine = String
-type CppLine = String
-
-clampWidth :: Int
-clampWidth = 80
-
-clamp :: Int -> Int
-clamp x = min x clampWidth
+import Data.Maybe
 
 lrToSubListSpan :: LineRange -> (FromLine, ToLine)
 lrToSubListSpan (LineRange fl tl) = (fl - 1, tl - 1)
@@ -24,15 +17,17 @@ rangeSize (Just (LineRange fl tl)) = tl - fl
 subList :: (Int, Int) -> [a] -> [a]
 subList (begin, end) ls = take (end - begin) . drop begin $ ls
 
-renderAssociation :: [LineAssociation] -> [CLine] -> [CppLine] -> String
-renderAssociation las cls cppls =
+renderAssociation :: Options -> [LineAssociation] -> [CLine] -> [CppLine] -> String
+renderAssociation opts las cls cppls =
   concat $ intersperse divider $ map renderAssoc las
   where
     longestCLine = maximum $ map length cls
     longestCppLine = maximum $ map length cppls
-    sepString = " ||| "
+    sepString = verticalSep opts
+    maxLineLen = fromMaybe maxBound (maxWidth opts)
+    clamp len = min maxLineLen len
     lineWidth = length sepString + clamp longestCLine + clamp longestCppLine
-    divider = (take lineWidth $ repeat '-') ++ "\n"
+    divider = (take lineWidth $ cycle (horizSep opts)) ++ "\n"
     renderAssoc la =
       let cSize = rangeSize $ cRange la
           cppSize = rangeSize $ cppRange la
@@ -43,13 +38,12 @@ renderAssociation las cls cppls =
           cppLines = case cppRange la of
                        (Just lr) -> subList (lrToSubListSpan lr) cppls
                        Nothing -> []
-          paddedCLines   = padLines cLines   (clamp longestCLine)   assocSize ' ' '.'
-          paddedCppLines = padLines cppLines (clamp longestCppLine) assocSize ' ' '.'
+          paddedCLines   = padLines cLines   (clamp longestCLine)   assocSize (linePadder opts) (emptyLine opts)
+          paddedCppLines = padLines cppLines (clamp longestCppLine) assocSize (linePadder opts) (emptyLine opts)
       in unlines $ zipWith (\c p -> c ++ sepString ++ p) paddedCLines paddedCppLines
 
-padLines :: [[a]] -> Int -> Int -> a -> a -> [[a]]
-padLines ls width len linePadChar emptyLineChar =
-  let emptyPadLine = take width $ repeat emptyLineChar
-      linePadding = repeat linePadChar
-      padder l = take width $ l ++ linePadding
+padLines :: [String] -> Int -> Int -> String -> String -> [String]
+padLines ls width len linePadStr emptyLineStr =
+  let emptyPadLine = take width $ cycle emptyLineStr
+      padder l = take width $ l ++ cycle linePadStr
   in take len $ (map padder ls) ++ (repeat emptyPadLine)

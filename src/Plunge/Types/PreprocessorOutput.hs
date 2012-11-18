@@ -5,6 +5,8 @@ module Plunge.Types.PreprocessorOutput
   , LineNumber
   , FromLine
   , ToLine
+  , CLine
+  , CppLine
   , CppDirective(..)
   , DirectiveFlag(..)
   ) where
@@ -12,6 +14,9 @@ module Plunge.Types.PreprocessorOutput
 type LineNumber = Int
 type FromLine = Int
 type ToLine   = Int
+
+type CLine = String
+type CppLine = String
 
 data DirectiveFlag = EnterFile | ReturnFile | SystemHeader | ExternC
   deriving (Show, Ord, Eq)

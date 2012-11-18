@@ -29,4 +29,5 @@ executable plunge
                      pretty      >= 1.1,
                      prettyclass >= 1.0,
                      process     >= 1.1,
-                     pretty-show >= 1.2
+                     pretty-show >= 1.2,
+                     cmdargs     >= 0.10.1
