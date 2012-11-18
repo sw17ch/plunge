@@ -61,7 +61,7 @@ Example
 -------
 
 Here's a sample session using `example_files/sample.c` from this project.
-```sh
+```
 $ plunge -i example_files/sample.c -m 40 -g -DCAT
 ........................................ | # 1 "example_files/sample.c"            
 -----------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ the other side.
 For completness, here's another run of the same file that uses different
 options.
 
-```sh
+```
 Shiny:plunge [git:branch master]$ ./dist/build/plunge/plunge -i example_files/sample.c -m 10
 .......... | # 1 "examp
 -----------------------
