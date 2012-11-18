@@ -8,6 +8,24 @@ import Control.Monad
 
 import System.Environment
 
+type Options = Options { inputFile     :: Maybe String
+                       , linePader     :: Char
+                       , emptyLineChar :: Char
+                       , maxWidth      :: Maybe Int
+                       , showLineNums  :: Bool
+                       , colorize      :: Bool
+                       , separator     :: String
+                       } deriving (Show)
+
+defaultOpts :: Options
+defaultOpts = Options { inputFile = Nothing
+                      , linePadder = ' '
+                      , emptyLineChar = '.'
+                      , maxWidth = Nothing
+                      , showLineNums = False
+                      , colorize = False
+                      , separator = " | "
+                      }
 
 main :: IO ()
 main = do
