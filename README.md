@@ -30,6 +30,25 @@ After running the above command, the binary will be located at:
 ```sh
 ./dist/build/plunge/plunge [your_file.c]
 ```
+The full list of options can be found by passing `--help` or `-?` to `plunge`.
+
+```
+$ ./dist/build/plunge/plunge -?
+The options program
+
+options [OPTIONS]
+
+Common flags:
+  -i --input-file=ITEM --inputfile        
+  -g --gcc-option=ITEM --gccoptions       
+  -l --line-padding=ITEM --linepadder     
+  -e --empty-line-padding=ITEM --emptyline
+  -m --max-width=INT --maxwidth           
+  -v --vertical-sep=ITEM --verticalsep    
+  -h --horizontal-sep=ITEM --horizsep     
+  -? --help                                 Display help message
+  -V --version                              Print version information
+```
 
 Explanation
 -----------
@@ -105,9 +124,6 @@ that it is easy to tell which preprocessed code resulted from which C code.
 
 Lines filled with dots are lines that did no have any corresponding data from
 the other side.
-
-See the full list of options to this program by passing `-?` or `--help` to
-`plunge`.
 
 For completness, here's another run of the same file that uses different
 options.
