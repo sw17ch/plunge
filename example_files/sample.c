@@ -17,8 +17,8 @@ int foo(int x) {
   return ADD_THINGS(x, 5);
 }
 
-#ifdef DOGGY
-void doggy(void) {
+#ifdef CAT
+void cat(void) {
 }
 #endif
 
