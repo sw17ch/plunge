@@ -5,7 +5,7 @@ import Data.Data
 import System.Console.CmdArgs
 
 data Options = Options { inputFile    :: FilePath
-                       -- , gccOptions   :: [String]
+                       , gccOptions   :: [String]
                        , linePadder   :: String
                        , emptyLine    :: String
                        , maxWidth     :: Maybe Int
@@ -17,7 +17,7 @@ data Options = Options { inputFile    :: FilePath
 
 defaultOpts :: Options
 defaultOpts = Options { inputFile = def      &= name "input-file"
-                      -- , gccOptions = []      &= name "gcc-option"
+                      , gccOptions = []      &= name "gcc-option"
                       , linePadder = " "     &= name "line-padding"
                       , emptyLine = "."      &= name "empty-line-padding"
                       , maxWidth = Nothing   &= name "max-width"

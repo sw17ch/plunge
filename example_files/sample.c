@@ -17,6 +17,11 @@ int foo(int x) {
   return ADD_THINGS(x, 5);
 }
 
+#ifdef DOGGY
+void doggy(void) {
+}
+#endif
+
 int main(int argc, char * argv[]) {
   return foo(10);
 }

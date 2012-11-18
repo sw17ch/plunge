@@ -13,7 +13,7 @@ main :: IO ()
 main = do
   opts <- cmdArgs defaultOpts
 
-  cppResult <- preprocessFile (inputFile opts) []
+  cppResult <- preprocessFile (inputFile opts) (gccOptions opts)
   cData <- readFile (inputFile opts)
 
   case cppResult of
