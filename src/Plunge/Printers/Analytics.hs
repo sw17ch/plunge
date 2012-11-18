@@ -5,11 +5,8 @@ module Plunge.Printers.Analytics
 import Plunge.Types.PreprocessorOutput
 import Data.List
 
-type CLine = String
-type CppLine = String
-
 clampWidth :: Int
-clampWidth = 80
+clampWidth = 50
 
 clamp :: Int -> Int
 clamp x = min x clampWidth
