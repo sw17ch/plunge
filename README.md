@@ -32,22 +32,22 @@ After running the above command, the binary will be located at:
 ```
 The full list of options can be found by passing `--help` or `-?` to `plunge`.
 
-```
-$ ./dist/build/plunge/plunge -?
-The options program
+```txt
+Plunge 0.0.0.0, (C) John Van Enk 2012
 
-options [OPTIONS]
+plunge [OPTIONS]
 
 Common flags:
-  -i --input-file=ITEM --inputfile        
-  -g --gcc-option=ITEM --gccoptions       
-  -l --line-padding=ITEM --linepadder     
-  -e --empty-line-padding=ITEM --emptyline
-  -m --max-width=INT --maxwidth           
-  -v --vertical-sep=ITEM --verticalsep    
-  -h --horizontal-sep=ITEM --horizsep     
-  -? --help                                 Display help message
-  -V --version                              Print version information
+  -i --input-file=ITEM          The C file to analyze.
+  -g --gcc-option=ITEM          An option to pass to GCC. Can be specified
+                                multiple times.
+  -p --line-padding=ITEM      
+  -e --empty-line-padding=ITEM
+  -w --max-width=INT          
+  -v --vertical-sep=ITEM      
+  -h --horizontal-sep=ITEM    
+  -? --help                     Display help message
+  -V --version                  Print version information
 ```
 
 Explanation
