@@ -8,15 +8,15 @@ import Plunge.Types.PreprocessorOutput
 
 -- Fill in any gaps left by making associations out of CPP spans.
 lineAssociations :: [Section] -> [LineAssociation]
-lineAssociations ss = concat $ snd $ mapAccumL fillGap 0 assocs
+lineAssociations ss = concat $ snd $ mapAccumL fillGap 1 assocs
   where
     fillGap :: LineNumber -> LineAssociation -> (LineNumber, [LineAssociation])
     fillGap n (LineAssociation Nothing Nothing) = (n, [])
     fillGap n a@(LineAssociation Nothing (Just _)) = (n, [a])
     fillGap _ a@(LineAssociation (Just clr) Nothing) = (toLine clr, [a])
-    fillGap n a@(LineAssociation (Just clr) (Just _)) | n < cTo = (cTo,  [gap, a])
-                                                      | n == cTo = (cTo, [a])
-                                                      | otherwise = (n, []) -- n > cTo
+    fillGap n a@(LineAssociation (Just clr) (Just _)) | n < cFrom = (cTo, [gap, a])
+                                                      | n == cFrom = (cTo, [a])
+                                                      | otherwise = (n, []) -- n > cFrom
       where cTo = toLine clr
             cFrom = fromLine clr
             gap = LineAssociation (Just $ LineRange n cFrom) Nothing

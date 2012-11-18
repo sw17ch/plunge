@@ -3,6 +3,8 @@ module Plunge.Types.PreprocessorOutput
   , LineRange(..)
   , LineAssociation(..)
   , LineNumber
+  , FromLine
+  , ToLine
   , CppDirective(..)
   , DirectiveFlag(..)
   ) where
