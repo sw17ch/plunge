@@ -1,35 +1,39 @@
 module Plunge.Printers.Analytics
-  ( renderAssociation 
+  ( renderAssociation
   ) where
 
 import Plunge.Types.PreprocessorOutput
-import Text.PrettyPrint
 import Data.List
 
 type CLine = String
 type CppLine = String
 
+clampWidth :: Int
 clampWidth = 80
+
+clamp :: Int -> Int
 clamp x = min x clampWidth
 
+lrToSubListSpan :: LineRange -> (FromLine, ToLine)
 lrToSubListSpan (LineRange fl tl) = (fl - 1, tl - 1)
 
+rangeSize :: Maybe LineRange -> Int
 rangeSize Nothing = 0
 rangeSize (Just (LineRange fl tl)) = tl - fl
 
 subList :: (Int, Int) -> [a] -> [a]
-subList (begin, end) lines = take (end - begin) . drop begin $ lines
+subList (begin, end) ls = take (end - begin) . drop begin $ ls
 
 renderAssociation :: [LineAssociation] -> [CLine] -> [CppLine] -> String
 renderAssociation las cls cppls =
-  concat $ intersperse divider $ map render las
+  concat $ intersperse divider $ map renderAssoc las
   where
     longestCLine = maximum $ map length cls
     longestCppLine = maximum $ map length cppls
     sepString = " ||| "
     lineWidth = length sepString + clamp longestCLine + clamp longestCppLine
     divider = (take lineWidth $ repeat '-') ++ "\n"
-    render la =
+    renderAssoc la =
       let cSize = rangeSize $ cRange la
           cppSize = rangeSize $ cppRange la
           assocSize = max cSize cppSize
@@ -39,10 +43,11 @@ renderAssociation las cls cppls =
           cppLines = case cppRange la of
                        (Just lr) -> subList (lrToSubListSpan lr) cppls
                        Nothing -> []
-          paddedCLines   = padLines cLines   (clamp longestCLine)   assocSize ' ' ' '
-          paddedCppLines = padLines cppLines (clamp longestCppLine) assocSize ' ' ' '
+          paddedCLines   = padLines cLines   (clamp longestCLine)   assocSize ' ' '.'
+          paddedCppLines = padLines cppLines (clamp longestCppLine) assocSize ' ' '.'
       in unlines $ zipWith (\c p -> c ++ sepString ++ p) paddedCLines paddedCppLines
 
+padLines :: [[a]] -> Int -> Int -> a -> a -> [[a]]
 padLines ls width len linePadChar emptyLineChar =
   let emptyPadLine = take width $ repeat emptyLineChar
       linePadding = repeat linePadChar
