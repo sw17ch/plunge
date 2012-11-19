@@ -24,22 +24,29 @@ data Options = Options { inputFile    :: FilePath
 defaultOpts :: Options
 defaultOpts = Options { inputFile = def      &= explicit &= name "input-file"
                                                          &= name "i"
+                                                         &= typ "FILE"
                                              &= inputFile_help
                       , gccOptions = def     &= explicit &= name "gcc-option"
                                                          &= name "g"
+                                                         &= typ "OPTION"
                                              &= gccOptions_help
                       , linePadder = " "     &= explicit &= name "line-padding"
                                                          &= name "p"
+                                                         &= typ "STRING"
                       , emptyLine = "."      &= explicit &= name "empty-line-padding"
                                                          &= name "e"
+                                                         &= typ "STRING"
                       , maxWidth = Nothing   &= explicit &= name "max-width"
                                                          &= name "w"
+                                                         &= typ "NUMBER"
                       -- , showLineNums = False &= name "show-line-numbers"
                       -- , colorize = False     &= name "colorize"
                       , verticalSep = " | "  &= explicit &= name "vertical-sep"
                                                          &= name "v"
+                                                         &= typ "STRING"
                       , horizSep = "-"       &= explicit &= name "horizontal-sep"
                                                          &= name "h"
+                                                         &= typ "STRING"
                       } &= program "plunge"
                         &= summary summary_str
 
