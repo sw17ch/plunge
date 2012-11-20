@@ -38,16 +38,16 @@ Plunge 0.0.0.0, (C) John Van Enk 2012
 plunge [OPTIONS]
 
 Common flags:
-  -i --input-file=ITEM          The C file to analyze.
-  -g --gcc-option=ITEM          An option to pass to GCC. Can be specified
-                                multiple times.
-  -p --line-padding=ITEM      
-  -e --empty-line-padding=ITEM
-  -w --max-width=INT          
-  -v --vertical-sep=ITEM      
-  -h --horizontal-sep=ITEM    
-  -? --help                     Display help message
-  -V --version                  Print version information
+  -i --input-file=FILE            The C file to analyze.
+  -g --gcc-option=OPTION          An option to pass to GCC. Can be specified
+                                  multiple times.
+  -p --line-padding=STRING      
+  -e --empty-line-padding=STRING
+  -w --max-width=NUMBER         
+  -v --vertical-sep=STRING      
+  -h --horizontal-sep=STRING    
+  -? --help                       Display help message
+  -V --version                    Print version information
 ```
 
 Explanation
