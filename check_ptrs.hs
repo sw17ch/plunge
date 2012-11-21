@@ -40,12 +40,12 @@ analyzeExt (CFDefExt fdec) = analyzeFunDef fdec
 analyzeExt (CAsmExt _ _) = "literal asm"
 
 analyzeCDecl  (CDecl specs decls d) = (concat $ map analyzeCDecls decls)
-analyzeFunDef (CFunDef _ decl _ stmt _) = concat (analyzeDeclr decl) -- ++ (analyzeCStatement stmt) ++ "\n"
+analyzeFunDef (CFunDef _ decl _ stmt _) = concat (analyzeDeclr decl) ++ (analyzeCStatement stmt) ++ "\n"
 
 analyzeDeclr (CDeclr ident dirDecls _ attrs info) = map analyzeDerived dirDecls
 
-analyzeDerived (CPtrDeclr quals info) = show quals
-analyzeDerived (CArrDeclr quals size info) = show quals
+analyzeDerived (CPtrDeclr quals info) = "" -- show quals
+analyzeDerived (CArrDeclr quals size info) = "" -- show quals
 analyzeDerived (CFunDeclr (Left idnts) _ info) = ""
 analyzeDerived (CFunDeclr (Right (decls, flag)) _ info) = concat $ map analyzeCDecl decls
 
@@ -60,7 +60,7 @@ analyzeCStatement (CCases e e' s _) = ""
 analyzeCStatement (CDefault s _) = ""
 analyzeCStatement (CExpr Nothing _) = ""
 analyzeCStatement (CExpr (Just e) _) = ""
-analyzeCStatement (CCompound _ items _) = ""
+analyzeCStatement (CCompound _ items _) = concat $ map analyzeCCompound items
 analyzeCStatement (CIf e s (Nothing) _) = ""
 analyzeCStatement (CIf e s (Just s') _) = ""
 analyzeCStatement (CSwitch e s _) = ""
@@ -81,3 +81,8 @@ showFile (Just f) = f
 
 isPtr attrs | 0 < length [x | x@(CPtrDeclr _ _) <- attrs] = True
             | otherwise = False
+
+
+analyzeCCompound (CBlockStmt a) = analyzeCStatement a
+analyzeCCompound (CBlockDecl a) = analyzeCDecl a
+analyzeCCompound (CNestedFunDef a) = analyzeFunDef a
