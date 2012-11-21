@@ -32,7 +32,7 @@ After running the above command, the binary will be located at:
 ```
 The full list of options can be found by passing `--help` or `-?` to `plunge`.
 
-```txt
+```
 Plunge 0.0.0.0, (C) John Van Enk 2012
 
 plunge [OPTIONS]
