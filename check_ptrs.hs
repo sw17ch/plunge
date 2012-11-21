@@ -39,7 +39,7 @@ analyzeExt (CDeclExt decl) = analyzeCDecl decl
 analyzeExt (CFDefExt fdec) = analyzeFunDef fdec
 analyzeExt (CAsmExt _ _) = "literal asm"
 
-analyzeCDecl  (CDecl specs decls d) = (concat $ map analyzeCDecls decls)
+analyzeCDecl  (CDecl specs decls d) = (concat $ map analyzeSpecs specs) ++ (concat $ map analyzeCDecls decls)
 analyzeFunDef (CFunDef _ decl _ stmt _) = concat (analyzeDeclr decl) ++ (analyzeCStatement stmt) ++ "\n"
 
 analyzeDeclr (CDeclr ident dirDecls _ attrs info) = map analyzeDerived dirDecls
@@ -53,6 +53,15 @@ analyzeCDecls (Nothing, _, _) = ""
 analyzeCDecls (Just (CDeclr Nothing _ _ _ _), _, _) = ""
 analyzeCDecls (Just (CDeclr (Just (Ident ident _ info)) attrs _ _ _), _, _) | isPtr attrs = "POINTER: " ++ ident ++ " -- " ++ (showFile $ fileOfNode info) ++ ":" ++ (show $ posRow $ posOfNode info) ++ "\n"
                                                                             | otherwise = ""
+
+analyzeSpecs (CTypeSpec s) =  analyzeCTypeSpec s
+analyzeSpecs _ = ""
+
+analyzeCTypeSpec (CSUType s _) = analyzeCStruct s
+analyzeCTypeSpec _ = ""
+
+analyzeCStruct (CStruct _ _ (Just decl) _ _) = concat $ map analyzeCDecl decl
+analyzeCStruct _ = ""
 
 analyzeCStatement (CLabel _ s _ _) = ""
 analyzeCStatement (CCase e s _) = ""
