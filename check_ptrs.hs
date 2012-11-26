@@ -4,6 +4,8 @@ module Main where
 import Control.Monad
 import System.Console.CmdArgs
 import Data.Generics.Schemes
+import Data.List
+import Data.Maybe
 import Language.C
 import Language.C.Data.Ident
 import Language.C.System.GCC
@@ -28,7 +30,7 @@ main = do
 
     case parsed of
         Left e -> error $ "Unable to parse file:" ++ (show e)
-        Right result -> analyze result
+        Right result -> putStrLn $ analyze result
 
 getDeclrs :: Typeable a => CTranslUnit -> [CDeclarator a]
 getDeclrs ctu = (listify isDecl) ctu
@@ -36,13 +38,16 @@ getDeclrs ctu = (listify isDecl) ctu
     isDecl :: Typeable a => CDeclarator a -> Bool
     isDecl _ = True
 
-analyze :: CTranslUnit -> IO ()
-analyze ctu = putStrLn $ concatMap analyzeCDeclrs (getDeclrs ctu :: [CDeclarator NodeInfo])
+analyze :: CTranslUnit -> String
+analyze ctu = let declrs = getDeclrs ctu :: [CDeclarator NodeInfo]
+              in concat $ intersperse "\n" $ mapMaybe analyzeCDeclrs declrs
 
-analyzeCDeclrs :: CDeclarator t -> [Char]
-analyzeCDeclrs (CDeclr Nothing _ _ _ _) = ""
-analyzeCDeclrs (CDeclr (Just (Ident ident _ info)) attrs _ _ _) | isPtr attrs = "POINTER: " ++ ident ++ " -- " ++ (showFile $ fileOfNode info) ++ ":" ++ (show $ posRow $ posOfNode info) ++ "\n"
-                                                                | otherwise = ""
+analyzeCDeclrs :: CDeclarator t -> Maybe String
+analyzeCDeclrs (CDeclr Nothing _ _ _ _) = Nothing
+analyzeCDeclrs (CDeclr (Just (Ident ident _ info)) attrs _ _ _) | isPtr attrs = Just rendering
+                                                                | otherwise = Nothing
+  where
+    rendering = "POINTER: " ++ ident ++ " -- " ++ (showFile $ fileOfNode info) ++ ":" ++ (show $ posRow $ posOfNode info)
 
 isPtr :: [CDerivedDeclarator t] -> Bool
 isPtr attrs | 0 < length [x | x@(CPtrDeclr _ _) <- attrs] = True
