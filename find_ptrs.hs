@@ -16,7 +16,10 @@ data Options = Options { filePath :: FilePath
                        } deriving (Data, Typeable, Show)
 
 defOpts :: Options
-defOpts = Options { filePath = def, cppFlags = def, cppFlagFile = def }
+defOpts = Options { filePath    = def
+                  , cppFlags    = def &= name "c"
+                  , cppFlagFile = def
+                  }
 
 main :: IO ()
 main = do
