@@ -1,14 +1,13 @@
-{-# LANGUAGE DeriveDataTypeable #-}
 module Plunge.Options ( Options(..)
-                      , defaultOpts
+                      , options
                       ) where
 
 import Paths_plunge
 
-import Data.Data
 import Data.List
+import Data.Monoid
 import Data.Version
-import System.Console.CmdArgs
+import Options.Applicative
 
 data Options = Options { inputFile    :: FilePath
                        , gccOptions   :: [String]
@@ -19,37 +18,51 @@ data Options = Options { inputFile    :: FilePath
                        -- , colorize     :: Bool
                        , verticalSep  :: String
                        , horizSep     :: String
-                       } deriving (Show, Data, Typeable)
+                       } deriving (Show)
 
-defaultOpts :: Options
-defaultOpts = Options { inputFile = def      &= explicit &= name "input-file"
-                                                         &= name "i"
-                                                         &= typ "FILE"
-                                             &= inputFile_help
-                      , gccOptions = def     &= explicit &= name "gcc-option"
-                                                         &= name "g"
-                                                         &= typ "OPTION"
-                                             &= gccOptions_help
-                      , linePadder = " "     &= explicit &= name "line-padding"
-                                                         &= name "p"
-                                                         &= typ "STRING"
-                      , emptyLine = "."      &= explicit &= name "empty-line-padding"
-                                                         &= name "e"
-                                                         &= typ "STRING"
-                      , maxWidth = Nothing   &= explicit &= name "max-width"
-                                                         &= name "w"
-                                                         &= typ "NUMBER"
-                      -- , showLineNums = False &= name "show-line-numbers"
-                      -- , colorize = False     &= name "colorize"
-                      , verticalSep = " | "  &= explicit &= name "vertical-sep"
-                                                         &= name "v"
-                                                         &= typ "STRING"
-                      , horizSep = "-"       &= explicit &= name "horizontal-sep"
-                                                         &= name "h"
-                                                         &= typ "STRING"
-                      } &= program "plunge"
-                        &= summary summary_str
+optParser :: Parser Options
+optParser = Options
+  <$> strOption
+      ( long "input-file" <> short 'i'
+     <> metavar "FILE"
+     <> help "The C file to analyze." )
+  <*> (many $ strOption
+      ( long "gcc-option" <> short 'g'
+     <> metavar "OPTION"
+     <> help "An option to pass to GCC. Can be specified multiple times." ))
+  <*> option
+      ( long "line-pad" <> short 'p'
+     <> metavar "STRING"
+     <> help "String to use to pad lines."
+     <> value " "
+     <> showDefault )
+  <*> option
+      ( long "empty-line" <> short 'e'
+     <> metavar "STRING"
+     <> help "String to use to represent empty lines"
+     <> value "-"
+     <> showDefault )
+  <*> optional ( option
+      ( long "max-width" <> short 'm'
+     <> metavar "NUMBER"
+     <> help "How wide each column of output is allowed to be"
+     <> value 80
+     <> showDefault ))
+  <*> option
+      ( long "vert-sep" <> short 'v'
+     <> metavar "STRING"
+     <> help "What string to use to separate the two columns"
+     <> value " | "
+     <> showDefault )
+  <*> option
+      ( long "horiz-sep" <> short 'h'
+     <> metavar "STRING"
+     <> help "What string to use to separate horizontal segments"
+     <> value "-"
+     <> showDefault )
 
+options :: ParserInfo Options
+options = info (helper <*> optParser) (header summary_str)
 
 summary_str :: String
 summary_str = let tags = versionTags version
@@ -58,10 +71,3 @@ summary_str = let tags = versionTags version
                                 [] -> ""
                                 _  -> " (" ++ (concat $ intersperse ", " $ tags) ++ ")"
             in "Plunge " ++ branch_str ++ tags_str ++ ", (C) John Van Enk 2012"
-
-
-inputFile_help :: Ann
-inputFile_help = help "The C file to analyze."
-
-gccOptions_help :: Ann
-gccOptions_help = help "An option to pass to GCC. Can be specified multiple times."

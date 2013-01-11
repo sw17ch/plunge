@@ -1,6 +1,6 @@
 module Main where
 
-import System.Console.CmdArgs
+import Options.Applicative
 
 import Plunge.Options
 import Plunge.Parsers.PreprocessorOutput
@@ -10,9 +10,10 @@ import Plunge.Printers.Analytics
 import Plunge.Types.PreprocessorOutput
 
 main :: IO ()
-main = do
-  opts <- cmdArgs defaultOpts
+main = execParser options >>= runWithOptions
 
+runWithOptions :: Options -> IO ()
+runWithOptions opts = do
   cppResult <- preprocessFile (inputFile opts) (gccOptions opts)
   cData <- readFile (inputFile opts)
 
