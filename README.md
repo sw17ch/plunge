@@ -33,21 +33,20 @@ After running the above command, the binary will be located at:
 The full list of options can be found by passing `--help` or `-?` to `plunge`.
 
 ```txt
+$ ./dist/build/plunge/plunge --help
 Plunge 0.0.0.0, (C) John Van Enk 2012
 
-plunge [OPTIONS]
+Usage: plunge (-i|--input-file FILE) [-g|--gcc-option OPTION] [-p|--line-pad STRING] [-e|--empty-line STRING] [-m|--max-width NUMBER] [-v|--vert-sep STRING] [-h|--horiz-sep STRING]
 
-Common flags:
-  -i --input-file=FILE            The C file to analyze.
-  -g --gcc-option=OPTION          An option to pass to GCC. Can be specified
-                                  multiple times.
-  -p --line-padding=STRING      
-  -e --empty-line-padding=STRING
-  -w --max-width=NUMBER         
-  -v --vertical-sep=STRING      
-  -h --horizontal-sep=STRING    
-  -? --help                       Display help message
-  -V --version                    Print version information
+Available options:
+  -h,--help                Show this help text
+  -i,--input-file FILE     The C file to analyze.
+  -g,--gcc-option OPTION   An option to pass to GCC. Can be specified multiple times.
+  -p,--line-pad STRING     String to use to pad lines. (default: " ")
+  -e,--empty-line STRING   String to use to represent empty lines (default: "-")
+  -m,--max-width NUMBER    How wide each column of output is allowed to be (default: 80)
+  -v,--vert-sep STRING     What string to use to separate the two columns (default: " | ")
+  -h,--horiz-sep STRING    What string to use to separate horizontal segments (default: "-")
 ```
 
 Explanation
