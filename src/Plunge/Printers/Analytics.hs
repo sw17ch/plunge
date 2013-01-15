@@ -17,17 +17,22 @@ rangeSize (Just (LineRange fl tl)) = tl - fl
 subList :: (Int, Int) -> [a] -> [a]
 subList (begin, end) ls = take (end - begin) . drop begin $ ls
 
-renderAssociation :: Options -> [LineAssociation] -> [CLine] -> [CppLine] -> String
-renderAssociation opts las cls cppls =
-  concat $ intersperse divider $ map renderAssoc las
+-- renderAssociation :: Options -> [LineAssociation] -> [CLine] -> [CppLine] -> String
+renderAssociation las cls cppls
+                  _linePadder
+                  _emptyLine
+                  _maxWidth
+                  _verticalSep
+                  _horizSep
+  = concat $ intersperse divider $ map renderAssoc las
   where
     longestCLine = maximum $ map length cls
     longestCppLine = maximum $ map length cppls
-    sepString = verticalSep opts
-    maxLineLen = fromMaybe maxBound (maxWidth opts)
+    sepString = _verticalSep
+    maxLineLen = fromMaybe maxBound _maxWidth
     clamp len = min maxLineLen len
     lineWidth = length sepString + clamp longestCLine + clamp longestCppLine
-    divider = (take lineWidth $ cycle (horizSep opts)) ++ "\n"
+    divider = (take lineWidth $ cycle _horizSep) ++ "\n"
     renderAssoc la =
       let cSize = rangeSize $ cRange la
           cppSize = rangeSize $ cppRange la
@@ -38,8 +43,8 @@ renderAssociation opts las cls cppls =
           cppLines = case cppRange la of
                        (Just lr) -> subList (lrToSubListSpan lr) cppls
                        Nothing -> []
-          paddedCLines   = padLines cLines   (clamp longestCLine)   assocSize (linePadder opts) (emptyLine opts)
-          paddedCppLines = padLines cppLines (clamp longestCppLine) assocSize (linePadder opts) (emptyLine opts)
+          paddedCLines   = padLines cLines   (clamp longestCLine)   assocSize _linePadder _emptyLine
+          paddedCppLines = padLines cppLines (clamp longestCppLine) assocSize _linePadder _emptyLine
       in unlines $ zipWith (\c p -> c ++ sepString ++ p) paddedCLines paddedCppLines
 
 padLines :: [String] -> Int -> Int -> String -> String -> [String]

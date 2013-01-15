@@ -1,3 +1,4 @@
+{-# LANGUAGe RecordWildCards #-}
 module Main where
 
 import Options.Applicative
@@ -10,28 +11,37 @@ import Plunge.Printers.Analytics
 import Plunge.Types.PreprocessorOutput
 
 main :: IO ()
-main = execParser options >>= runWithOptions
+main = execParser optionInfo >>= runWithOptions
 
-runWithOptions :: Options -> IO ()
-runWithOptions opts = do
-  cppResult <- preprocessFile (inputFile opts) (gccOptions opts)
-  cData <- readFile (inputFile opts)
+runWithOptions (Correspond {..}) = doCorrespond inputFile
+                                                gccOptions
+                                                linePadder
+                                                emptyLine
+                                                maxWidth
+                                                verticalSep
+                                                horizSep
+
+doCorrespond _inputFile _gccOptions _linePadder _emptyLine _maxWidth _verticalSep _horizSep = do
+  cppResult <- preprocessFile _inputFile _gccOptions
+  cData <- readFile _inputFile
 
   case cppResult of
     Left err  -> outputPreprocessorError err
-    Right cppData -> parse opts (inputFile opts) cData cppData
-
-parse :: Options -> FilePath -> String -> String -> IO ()
-parse opts fileName cData cppData = do
-  parsed <- runCppParser fileName cppData
-  case parsed of
-    Left err -> putStrLn $ "ERROR: " ++ (show err)
-    Right result -> analyze opts result (lines cData) (lines cppData)
-
-analyze :: Options -> [Section] -> [CLine] -> [CppLine] -> IO ()
-analyze opts result cLines cppLines = do
-  let assocs = lineAssociations result
-  putStrLn $ renderAssociation opts assocs cLines cppLines
+    Right cppData -> parse cData cppData
+  where
+    parse cData cppData = do
+      parsed <- runCppParser _inputFile cppData
+      case parsed of
+        Left err -> putStrLn $ "ERROR: " ++ (show err)
+        Right result -> analyze result (lines cData) (lines cppData)
+    analyze result cLines cppLines = do
+      let assocs = lineAssociations result
+      putStrLn $ renderAssociation assocs cLines cppLines
+                                   _linePadder
+                                   _emptyLine
+                                   _maxWidth
+                                   _verticalSep
+                                   _horizSep
 
 outputPreprocessorError :: CppError -> IO ()
 outputPreprocessorError e = do

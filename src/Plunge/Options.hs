@@ -1,5 +1,5 @@
-module Plunge.Options ( Options(..)
-                      , options
+module Plunge.Options ( PlungeCommand(..)
+                      , optionInfo
                       ) where
 
 import Paths_plunge
@@ -9,19 +9,24 @@ import Data.Monoid
 import Data.Version
 import Options.Applicative
 
-data Options = Options { inputFile    :: FilePath
-                       , gccOptions   :: [String]
-                       , linePadder   :: String
-                       , emptyLine    :: String
-                       , maxWidth     :: Maybe Int
-                       -- , showLineNums :: Bool
-                       -- , colorize     :: Bool
-                       , verticalSep  :: String
-                       , horizSep     :: String
-                       } deriving (Show)
+data PlungeCommand = Correspond { inputFile     :: FilePath
+                                , gccOptions    :: [String]
+                                , linePadder   :: String
+                                , emptyLine    :: String
+                                , maxWidth     :: Maybe Int
+                                -- , showLineNums :: Bool
+                                -- , colorize     :: Bool
+                                , verticalSep  :: String
+                                , horizSep     :: String
+                                } deriving (Show)
 
-optParser :: Parser Options
-optParser = Options
+optParser :: Parser PlungeCommand
+optParser = subparser (
+    command "correspond" correspondInfo
+  )
+
+correspondParser :: Parser PlungeCommand
+correspondParser = Correspond
   <$> strOption
       ( long "input-file" <> short 'i'
      <> metavar "FILE"
@@ -61,8 +66,12 @@ optParser = Options
      <> value "-"
      <> showDefault )
 
-options :: ParserInfo Options
-options = info (helper <*> optParser) (header summary_str)
+optionInfo :: ParserInfo PlungeCommand
+optionInfo = info (helper <*> optParser) (header summary_str)
+
+correspondInfo :: ParserInfo PlungeCommand
+correspondInfo = info (helper <*> correspondParser) (progDesc correspondDesc)
+
 
 summary_str :: String
 summary_str = let tags = versionTags version
@@ -71,3 +80,6 @@ summary_str = let tags = versionTags version
                                 [] -> ""
                                 _  -> " (" ++ (concat $ intersperse ", " $ tags) ++ ")"
             in "Plunge " ++ branch_str ++ tags_str ++ ", (C) John Van Enk 2012"
+
+correspondDesc :: String
+correspondDesc = "Align the lines of the C file with the resulting lines after preprocessing."
