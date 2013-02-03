@@ -18,12 +18,14 @@ data PlungeCommand = Correspond { inputFile     :: FilePath
                                 -- , colorize     :: Bool
                                 , verticalSep  :: String
                                 , horizSep     :: String
-                                } deriving (Show)
+                                }
+                   | Pointers { inputFile :: FilePath
+                              , gccOptions :: [String]
+                              } deriving (Show)
 
 optParser :: Parser PlungeCommand
-optParser = subparser (
-    command "correspond" correspondInfo
-  )
+optParser = subparser ( (command "correspond" correspondInfo) <>
+                        (command "pointers" pointersInfo ) )
 
 correspondParser :: Parser PlungeCommand
 correspondParser = Correspond
@@ -66,12 +68,25 @@ correspondParser = Correspond
      <> value "-"
      <> showDefault )
 
+pointersParser :: Parser PlungeCommand
+pointersParser = Pointers
+  <$> strOption 
+      ( long "input-file" <> short 'i'
+     <> metavar "FILE"
+     <> help "The C file to analyze." )
+  <*> (many $ strOption
+      ( long "gcc-option" <> short 'g'
+     <> metavar "OPTION"
+     <> help "An option to pass to GCC. Can be specified multiple times." ))
+
 optionInfo :: ParserInfo PlungeCommand
 optionInfo = info (helper <*> optParser) (header summary_str)
 
 correspondInfo :: ParserInfo PlungeCommand
 correspondInfo = info (helper <*> correspondParser) (progDesc correspondDesc)
 
+pointersInfo :: ParserInfo PlungeCommand
+pointersInfo = info (helper <*> pointersParser) (progDesc pointersDesc)
 
 summary_str :: String
 summary_str = let tags = versionTags version
@@ -83,3 +98,6 @@ summary_str = let tags = versionTags version
 
 correspondDesc :: String
 correspondDesc = "Align the lines of the C file with the resulting lines after preprocessing."
+
+pointersDesc :: String
+pointersDesc = "Identify all pointers declared in the specified file."
