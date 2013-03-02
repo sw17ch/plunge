@@ -1,4 +1,4 @@
-let g:hdevtools_options = '-g-Wall -g-isrc -g-idist/build/autogen'
+let g:hdevtools_options = '-g-Wall -g-isrc:dist/build/autogen'
 
 "let g:hasktag_dir_list = ["src", "test"]
 "let g:vim_ignore = ["cabal-dev", "dist"]

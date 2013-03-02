@@ -3,6 +3,7 @@ module Plunge.Parsers.PreprocessorOutput
   , Section(..)
   ) where
 
+import Data.Maybe
 import Text.Parsec
 import Plunge.Types.PreprocessorOutput
 
@@ -21,20 +22,20 @@ manyTillWithEnd p end = go []
     p_next cont = do
       p' <- p
       go (p':cont)
-    go cont = (p_end cont) <|> (p_next cont)
+    go cont = p_end cont <|> p_next cont
 
 --------------------------------------------------------------------------------
 
 runCppParser :: FilePath -> String -> IO (Either ParseError [Section])
-runCppParser path contents = runParserT aCppFile 1 path contents
+runCppParser = runParserT aCppFile 1
 
 aCppFile :: CppParser [Section]
 aCppFile = many aSection
 
 aSection :: CppParser Section
-aSection = (try aSectionMiscDirective)
-       <|> (try aSectionExpansion)
-       <|>      aSectionBlock
+aSection = try aSectionMiscDirective
+       <|> try aSectionExpansion
+       <|>     aSectionBlock
 
 aSectionMiscDirective :: CppParser Section
 aSectionMiscDirective = do
@@ -44,27 +45,25 @@ aSectionMiscDirective = do
   _                   <- newline
   p1 <- getPosition
 
-  modifyState (\_ -> lineNum)
-  return $ MiscDirective
+  modifyState $ const lineNum
+  return MiscDirective
     { directive = CppDirective lineNum fileName (fromJustList otherFlags)
     , lineRange = LineRange (sourceLine p0) (sourceLine p1)
     }
   where
-    fromJustList jlst = case jlst of
-                             Nothing  -> []
-                             Just lst -> lst
+    fromJustList = fromMaybe []
 
 aSectionExpansion :: CppParser Section
 aSectionExpansion = do
   p0 <- getPosition
   num <- getState
   ed <- aEnterFileDirective
-  (secs, rd) <- aSection `manyTillWithEnd` (try aReturnFileDirective)
+  (secs, rd) <- aSection `manyTillWithEnd` try aReturnFileDirective
   let (CppDirective rdNum _ _) = rd
   p1 <- getPosition
 
-  modifyState (\_ -> rdNum)
-  return $ Expansion
+  modifyState $ const rdNum
+  return Expansion
     { enterDirective  = ed
     , returnDirective = rd
     , startLine       = num
@@ -79,7 +78,7 @@ aSectionBlock = do
   ls <- many1 plainLine
   p1 <- getPosition
 
-  modifyState (\n -> n + (length ls))
+  modifyState (\n -> n + length ls)
   return $ Block ls startLn $ LineRange (sourceLine p0) (sourceLine p1)
   where
     plainLine = do
@@ -112,7 +111,7 @@ aDirectivePreamble = do
   _ <- string " \""
   fileNameStr <- many1 (noneOf "\"")
   _ <- char '"'
-  return $ (read lineNumStr, fileNameStr)
+  return (read lineNumStr, fileNameStr)
 
 aEnterFile, aReturnFile, aSystemHeader, aExternC :: CppParser DirectiveFlag
 aEnterFile    = char '1' >> return EnterFile

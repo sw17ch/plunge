@@ -24,8 +24,8 @@ data PlungeCommand = Correspond { inputFile     :: FilePath
                               } deriving (Show)
 
 optParser :: Parser PlungeCommand
-optParser = subparser ( (command "correspond" correspondInfo) <>
-                        (command "pointers" pointersInfo ) )
+optParser = subparser ( command "correspond" correspondInfo <>
+                        command "pointers" pointersInfo )
 
 correspondParser :: Parser PlungeCommand
 correspondParser = Correspond
@@ -80,7 +80,7 @@ pointersParser = Pointers
      <> help "An option to pass to GCC. Can be specified multiple times." ))
 
 optionInfo :: ParserInfo PlungeCommand
-optionInfo = info (helper <*> optParser) (header summary_str)
+optionInfo = info (helper <*> optParser) (header summaryStr)
 
 correspondInfo :: ParserInfo PlungeCommand
 correspondInfo = info (helper <*> correspondParser) (progDesc correspondDesc)
@@ -88,12 +88,12 @@ correspondInfo = info (helper <*> correspondParser) (progDesc correspondDesc)
 pointersInfo :: ParserInfo PlungeCommand
 pointersInfo = info (helper <*> pointersParser) (progDesc pointersDesc)
 
-summary_str :: String
-summary_str = let tags = versionTags version
-                  branch_str = concat $ intersperse "." $ map show (versionBranch version)
-                  tags_str = case tags of
+summaryStr :: String
+summaryStr = let tags = versionTags version
+                 branch_str = intercalate "." $ map show (versionBranch version)
+                 tags_str = case tags of
                                 [] -> ""
-                                _  -> " (" ++ (concat $ intersperse ", " $ tags) ++ ")"
+                                _  -> " (" ++ intercalate ", " tags ++ ")"
             in "Plunge " ++ branch_str ++ tags_str ++ ", (C) John Van Enk 2012"
 
 correspondDesc :: String

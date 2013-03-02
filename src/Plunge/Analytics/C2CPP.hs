@@ -1,4 +1,3 @@
-{-# LANGUAGE ViewPatterns #-}
 module Plunge.Analytics.C2CPP
   ( lineAssociations
   ) where
@@ -24,11 +23,11 @@ lineAssociations ss = concat $ snd $ mapAccumL fillGap 1 assocs
     assocs = sectionLineAssociations ss
 
 sectionLineAssociations :: [Section] -> [LineAssociation]
-sectionLineAssociations ss = map lineAssoc ss
+sectionLineAssociations = map lineAssoc
   where
     lineAssoc (Block bls sl lr) =
       LineAssociation { cppRange = Just lr
-                      , cRange = Just $ LineRange sl (sl + (length bls))
+                      , cRange = Just $ LineRange sl (sl + length bls)
                       }
     lineAssoc (MiscDirective _ lr) =
       LineAssociation { cppRange = Just lr

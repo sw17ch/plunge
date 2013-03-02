@@ -29,12 +29,12 @@ data LineRange = LineRange { fromLine :: FromLine
 
 data Section
   = Block
-      { blockLines  :: [String]
-      , startLine   :: LineNumber
-      , lineRange :: LineRange
+      { blockLines :: [String]
+      , startLine  :: LineNumber
+      , lineRange  :: LineRange
       }
   | MiscDirective
-      { directive   :: CppDirective
+      { directive :: CppDirective
       , lineRange :: LineRange
       }
   | Expansion
@@ -42,11 +42,11 @@ data Section
       , returnDirective :: CppDirective
       , startLine       :: LineNumber
       , sections        :: [Section]
-      , lineRange     :: LineRange
+      , lineRange       :: LineRange
       }
   deriving (Show)
 
-data LineAssociation = LineAssociation { cRange :: Maybe LineRange
+data LineAssociation = LineAssociation { cRange   :: Maybe LineRange
                                        , cppRange :: Maybe LineRange
                                        } deriving (Show)
 

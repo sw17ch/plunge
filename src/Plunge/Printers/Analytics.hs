@@ -3,7 +3,6 @@ module Plunge.Printers.Analytics
   ) where
 
 import Plunge.Types.PreprocessorOutput
-import Plunge.Options
 import Data.List
 import Data.Maybe
 
@@ -17,22 +16,30 @@ rangeSize (Just (LineRange fl tl)) = tl - fl
 subList :: (Int, Int) -> [a] -> [a]
 subList (begin, end) ls = take (end - begin) . drop begin $ ls
 
--- renderAssociation :: Options -> [LineAssociation] -> [CLine] -> [CppLine] -> String
+renderAssociation :: [LineAssociation]
+                  -> [CLine]
+                  -> [CppLine]
+                  -> String
+                  -> String
+                  -> Maybe Int
+                  -> String
+                  -> String
+                  -> String
 renderAssociation las cls cppls
                   _linePadder
                   _emptyLine
                   _maxWidth
                   _verticalSep
                   _horizSep
-  = concat $ intersperse divider $ map renderAssoc las
+  = intercalate divider $ map renderAssoc las
   where
     longestCLine = maximum $ map length cls
     longestCppLine = maximum $ map length cppls
     sepString = _verticalSep
     maxLineLen = fromMaybe maxBound _maxWidth
-    clamp len = min maxLineLen len
+    clamp = min maxLineLen
     lineWidth = length sepString + clamp longestCLine + clamp longestCppLine
-    divider = (take lineWidth $ cycle _horizSep) ++ "\n"
+    divider = take lineWidth (cycle _horizSep) ++ "\n"
     renderAssoc la =
       let cSize = rangeSize $ cRange la
           cppSize = rangeSize $ cppRange la
@@ -51,4 +58,4 @@ padLines :: [String] -> Int -> Int -> String -> String -> [String]
 padLines ls width len linePadStr emptyLineStr =
   let emptyPadLine = take width $ cycle emptyLineStr
       padder l = take width $ l ++ cycle linePadStr
-  in take len $ (map padder ls) ++ (repeat emptyPadLine)
+  in take len $ map padder ls ++ repeat emptyPadLine

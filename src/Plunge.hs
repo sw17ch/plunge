@@ -8,11 +8,12 @@ import Plunge.Parsers.PreprocessorOutput
 import Plunge.Preprocessor
 import Plunge.Analytics.C2CPP
 import Plunge.Printers.Analytics
-import Plunge.Types.PreprocessorOutput
 
 main :: IO ()
 main = execParser optionInfo >>= runWithOptions
 
+runWithOptions :: PlungeCommand -> IO ()
+runWithOptions (Pointers {..}) = error "UNIMPLEMENTED"
 runWithOptions (Correspond {..}) = doCorrespond inputFile
                                                 gccOptions
                                                 linePadder
@@ -21,6 +22,14 @@ runWithOptions (Correspond {..}) = doCorrespond inputFile
                                                 verticalSep
                                                 horizSep
 
+oCorrespond :: FilePath
+            -> [CppArg]
+            -> String
+            -> String
+            -> Maybe Int
+            -> String
+            -> String
+            -> IO ()
 doCorrespond _inputFile _gccOptions _linePadder _emptyLine _maxWidth _verticalSep _horizSep = do
   cppResult <- preprocessFile _inputFile _gccOptions
   cData <- readFile _inputFile
@@ -32,7 +41,7 @@ doCorrespond _inputFile _gccOptions _linePadder _emptyLine _maxWidth _verticalSe
     parse cData cppData = do
       parsed <- runCppParser _inputFile cppData
       case parsed of
-        Left err -> putStrLn $ "ERROR: " ++ (show err)
+        Left err -> putStrLn $ "ERROR: " ++ show err
         Right result -> analyze result (lines cData) (lines cppData)
     analyze result cLines cppLines = do
       let assocs = lineAssociations result
@@ -44,7 +53,7 @@ doCorrespond _inputFile _gccOptions _linePadder _emptyLine _maxWidth _verticalSe
                                    _horizSep
 
 outputPreprocessorError :: CppError -> IO ()
-outputPreprocessorError e = do
+outputPreprocessorError e = 
   mapM_ putStrLn [ "C PREPROCESSOR ERROR"
                  , "--------------------"
                  , e
