@@ -30,4 +30,5 @@ executable plunge
                      prettyclass          >= 1.0,
                      process              >= 1.1,
                      pretty-show          >= 1.2,
-                     optparse-applicative >= 0.5.2
+                     optparse-applicative >= 0.5.2,
+                     syb                  >= 0.3.6
